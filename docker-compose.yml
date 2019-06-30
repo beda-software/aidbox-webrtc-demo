@@ -1,0 +1,19 @@
+version: '2.1'
+
+services:
+  frontend:
+    build: ./frontend
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app/frontend
+  backend:
+    build: ./backend
+    ports:
+      - 3001:3001
+    volumes:
+      - ./backend:/app/backend
