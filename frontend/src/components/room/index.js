@@ -16,3 +16,11 @@ export function getRoomID() {
           .join('')
           .value()
 }
+
+export function initRoom (roomID) {
+    window.history.replaceState(
+        {},
+        `Room: ${roomID}`,
+        `/${roomID}`
+    );
+};

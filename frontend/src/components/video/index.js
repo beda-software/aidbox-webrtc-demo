@@ -13,7 +13,7 @@ export default (props) => {
     }
 
     return (
-        <div>
+        <div className="video-container">
             <video
                 onLoadedData={onReadyStateChange}
                 key={props.key || null}
@@ -25,7 +25,7 @@ export default (props) => {
                 autoPlay
                 width={props.width}
                 style={{
-                    display: isReady ? 'initial' : 'none'
+                    display: isReady ? 'initial' : 'none',
                 }}
             />
             <Loader active={!isReady} />

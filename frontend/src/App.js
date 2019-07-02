@@ -5,138 +5,133 @@ import io from 'socket.io-client';
 import copy from 'copy-text-to-clipboard';
 
 import Video from './components/video';
-import { createLogin, getRoomID } from './utils';
+import { createLogin, getRoomID, initRoom } from './components/room';
 
 import 'semantic-ui-css/semantic.min.css';
 import  { Button } from 'semantic-ui-react';
 
 import './App.css';
 
-
-
 const App = () => {
-  const [login, setLogin] = useState(createLogin());
-  const [remoteNegotiators, setRemoteNegotiators] = useState([]);
+  const [RTCConfig, setRTCConfig] = useState({});
   const [roomID, setRoomID] = useState(getRoomID());
   const [isCapturedUserMedia, setIsCapturedUserMedia] = useState(false);
+  const [localNegotiator, setLocalNegotiator] = useState(createLogin());
+  const [remoteNegotiators, setRemoteNegotiators] = useState([]);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
 
+  const captureLocalMedia = async () => {
+    return navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+  };
+
   useEffect(() => {
-  // Peer connection
-  const configuration = {
-    iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
-  };
+    // Peer connection
+    setRTCConfig({
+      iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
+    });
 
-  const connection = new RTCPeerConnection(configuration);
-
-  // Socket
-  const socket = io('http://localhost:3001');
-  socket.on('connect', () => {
-    send({
-      type: 'login',
-      name: login,
-    })
-  });
-  socket.on('error', console.log);
-  socket.on('message', (message) => {
-    console.log('Got message', message);
-    const data = JSON.parse(message);
-
-    switch (data.type) {
-      case 'login':
-        onLogin(data.name);
-        break;
-      case 'offer':
-        onOffer(data.offer, data.name);
-        break;
-      case 'answer':
-        onAnswer(data.answer);
-        break;
-      case 'candidate':
-        onCandidate(data.candidate);
-        break;
-      default:
-        break;
-    }
-  });
-
-  const onLogin = (name) => {
-    if (name !== login) {
-      console.log(`User ${name} joined`);
-      setRemoteNegotiators([...remoteNegotiators, name]);
-      connection.createOffer()
-        .then((offer) => {
+    const peerConnection = new RTCPeerConnection(RTCConfig);
+    peerConnection.onicecandidate = (e) => {
+      if (e.candidate) {
+        _.forEach(remoteNegotiators, (negotiator) => {
           send({
-            type: 'offer',
-            name,
-            offer,
+            type: "candidate",
+            name: negotiator,
+            candidate: e.candidate,
           });
-          connection.setLocalDescription(offer);
         })
-        .catch(console.log);
-    }
-  };
+      }
+    };
+    peerConnection.onaddstream = (e) => {
+      setRemoteStreams([...remoteStreams, e.stream]);
+    };
 
-  const onOffer = (offer, name) => {
-    connection.setRemoteDescription(new RTCSessionDescription(offer));
-    connection.createAnswer()
-      .then((answer) => {
-        connection.setLocalDescription(answer);
-        send({
-          type: "answer",
-          name,
-          answer,
-        })
+    // Signaling channel
+    const signalingChannel = io('http://localhost:3001');
+    signalingChannel.on('connect', () => {
+      send({
+        type: 'login',
+        name: localNegotiator,
       })
-      .catch(console.log)
-  };
+    });
+    signalingChannel.on('error', console.log);
+    signalingChannel.on('message', (message) => {
+      const { type, name, offer, answer, candidate } = JSON.parse(message);
 
-  const onAnswer = (answer) => {
-    connection.setRemoteDescription(new RTCSessionDescription(answer));
-  };
+      switch (type) {
+        case 'login':
+          onLogin(name);
+          break;
+        case 'offer':
+          onOffer(offer, name);
+          break;
+        case 'answer':
+          onAnswer(answer);
+          break;
+        case 'candidate':
+          onCandidate(candidate);
+          break;
+        default:
+          break;
+      }
+    });
 
-  const onCandidate = (candidate) => {
-    connection.addIceCandidate(new RTCIceCandidate(candidate));
-  };
+    const onLogin = (name) => {
+      if (name !== localNegotiator) {
+        setRemoteNegotiators([...remoteNegotiators, name]);
+        peerConnection.createOffer()
+          .then((offer) => {
+            send({
+              type: 'offer',
+              name,
+              offer,
+            });
+            peerConnection.setLocalDescription(offer);
+          })
+          .catch(console.log);
+      }
+    };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const send = (message) => {
-    socket.send(JSON.stringify(message));
-  };
+    const onOffer = (offer, name) => {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      peerConnection.createAnswer()
+        .then((answer) => {
+          peerConnection.setLocalDescription(answer);
+          send({
+            type: "answer",
+            name,
+            answer,
+          })
+        })
+        .catch(console.log)
+    };
 
-  const initRoom = () => {
-    window.history.replaceState({}, `Room: ${roomID}`, `/${roomID}`);
-  };
+    const onAnswer = (answer) => {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    };
 
-    initRoom();
+    const onCandidate = (candidate) => {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    };
+
+    const send = (message) => {
+      signalingChannel.send(JSON.stringify(message));
+    };
+
+    initRoom(roomID);
 
     if (!isCapturedUserMedia) {
-      navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
-      }).then((localStream) => {
-        setIsCapturedUserMedia(true);
-        setLocalStream(localStream);
-
-        connection.addStream(localStream);
-        connection.onicecandidate = (e) => {
-          if (e.candidate) {
-            console.log('remoteNegotiators before mapping', JSON.stringify(remoteNegotiators));
-            _.forEach(remoteNegotiators, (negotiator) => {
-              send({
-                type: "candidate",
-                name: negotiator,
-                candidate: e.candidate,
-              });
-            })
-          }
-        }
-        connection.onaddstream = (e) => {
-          setRemoteStreams([...remoteStreams, e.stream]);
-          console.log('addStream', e);
-        }
-      })
+      captureLocalMedia()
+        .then((stream) => {
+          setIsCapturedUserMedia(true);
+          setLocalStream(stream);
+          peerConnection.addStream(stream);
+        })
+        .catch(console.log)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -164,6 +159,30 @@ const App = () => {
             color="green"
             icon="share alternate"
             circular
+          />
+          <Button
+            icon="microphone"
+            size="big"
+            circular
+            disabled
+          />
+          <Button
+            color="red"
+            icon="phone"
+            size="big"
+            circular
+            disabled
+          />
+          <Button
+            icon="video"
+            size="big"
+            circular
+            disabled
+          />
+          <Button
+            icon="circle"
+            circular
+            disabled
           />
         </div>
       </div>
