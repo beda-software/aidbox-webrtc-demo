@@ -12,6 +12,7 @@
 
 .App-chat-main {
   height: 86vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -22,4 +23,19 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+
+.App-chat-controls button {
+  margin: 0 5px !important;
+}
+
+.App-chat-videos {
+  width: 100vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+video {
+  margin: 10px;
 }
