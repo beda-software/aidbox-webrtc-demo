@@ -12,11 +12,11 @@ export default (props) => {
         }
     }
 
-    return (
+    return props.stream && (
         <div className="video-container">
             <video
                 onLoadedData={onReadyStateChange}
-                key={props.key || null}
+                key={props.key}
                 ref={(video) => {
                     if (video) {
                         video.srcObject = props.stream;

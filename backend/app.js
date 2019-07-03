@@ -22,7 +22,7 @@ io.on('connection', function(connection) {
       }
 
       // Destruct if success
-      const { name } = data;
+      const { type, name, offer, answer, candidate } = data;
 
       //switching type of the user message
       switch (data.type) {
@@ -69,7 +69,7 @@ io.on('connection', function(connection) {
 
                sendTo(conn, {
                   type: "offer",
-                  offer: data.offer,
+                  offer: offer,
                   name: connection.name
                });
             }
@@ -85,7 +85,8 @@ io.on('connection', function(connection) {
                connection.otherName = name;
                sendTo(conn, {
                   type: "answer",
-                  answer: data.answer
+                  answer: answer,
+                  name: connection.name,
                });
             }
 
@@ -96,7 +97,7 @@ io.on('connection', function(connection) {
             var conn = users[name];
             sendTo(connection, {
                type: "candidate",
-               candidate: data.candidate
+               candidate: candidate
             });
 
             break;
@@ -116,9 +117,10 @@ io.on('connection', function(connection) {
             break;
 
          default:
+            console.log('Unknown:', data);
             sendTo(connection, {
                type: "error",
-               message: "Command not found: " + data.type
+               message: "Command not found: " + type
             });
 
             break;
