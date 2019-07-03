@@ -21,21 +21,33 @@ const App = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
 
-  const captureLocalMedia = async () => {
-    return navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: false,
-    });
-  };
-
   useEffect(() => {
+    const captureLocalMedia = async () => {
+      console.log('Capture local media...');
+      return navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+      });
+    };
+
+    initRoom(roomID);
+
+    if (!isCapturedUserMedia) {
+      captureLocalMedia()
+        .then((stream) => {
+          setIsCapturedUserMedia(true);
+          setLocalStream(stream);
+
     // Peer connection
     setRTCConfig({
       iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
     });
 
     const peerConnection = new RTCPeerConnection(RTCConfig);
+    console.log('RTC connection has been created.');
+
     peerConnection.onicecandidate = (e) => {
+      console.log('onicecandidate fired.');
       if (e.candidate) {
         _.forEach(remoteNegotiators, (negotiator) => {
           send({
@@ -46,9 +58,12 @@ const App = () => {
         })
       }
     };
-    peerConnection.onaddstream = (e) => {
+    peerConnection.onaddstream = async (e) => {
+      console.log('onaddstream event fired.');
       setRemoteStreams([...remoteStreams, e.stream]);
     };
+
+    peerConnection.addStream(stream);
 
     // Signaling channel
     const signalingChannel = io('http://localhost:3001');
@@ -80,23 +95,25 @@ const App = () => {
       }
     });
 
-    const onLogin = (name) => {
-      if (name !== localNegotiator) {
+    const onLogin = async (name) => {
+      if (name !== localNegotiator && !_.includes(remoteNegotiators, name)) {
+        console.log('onLogin handler fired. Name:', name);
         setRemoteNegotiators([...remoteNegotiators, name]);
         peerConnection.createOffer()
           .then((offer) => {
+            peerConnection.setLocalDescription(offer);
             send({
               type: 'offer',
               name,
               offer,
             });
-            peerConnection.setLocalDescription(offer);
           })
           .catch(console.log);
       }
     };
 
-    const onOffer = (offer, name) => {
+    const onOffer = async (offer, name) => {
+      console.log('onOffer handler fired.');
       peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
       peerConnection.createAnswer()
         .then((answer) => {
@@ -110,26 +127,20 @@ const App = () => {
         .catch(console.log)
     };
 
-    const onAnswer = (answer) => {
+    const onAnswer = async (answer) => {
+      console.log('onAnswer handler fired.');
       peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     };
 
-    const onCandidate = (candidate) => {
+    const onCandidate = async (candidate) => {
+      console.log('onCandidate handler fired.');
       peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     };
 
-    const send = (message) => {
+    const send = async (message) => {
+      console.log('Send message to signaling channel: ', message);
       signalingChannel.send(JSON.stringify(message));
     };
-
-    initRoom(roomID);
-
-    if (!isCapturedUserMedia) {
-      captureLocalMedia()
-        .then((stream) => {
-          setIsCapturedUserMedia(true);
-          setLocalStream(stream);
-          peerConnection.addStream(stream);
         })
         .catch(console.log)
     }
