@@ -25,6 +25,7 @@ export default (props) => {
                 }}
                 autoPlay
                 width={props.width}
+                height={props.height}
                 style={{
                     display: isReady ? 'initial' : 'none',
                 }}

@@ -146,6 +146,7 @@ const App = () => {
                   stream={stream}
                   key={i}
                   width="95%"
+                  height="100%"
                 />
               )
             )}
