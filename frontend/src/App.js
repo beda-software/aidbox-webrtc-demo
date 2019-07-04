@@ -38,93 +38,111 @@ const App = () => {
           setIsCapturedUserMedia(true);
           setLocalStream(stream);
 
-    // Peer connection
-    setRTCConfig({
-      iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
-    });
-
-    const peerConnection = new RTCPeerConnection(RTCConfig);
-    console.log('RTC connection has been created.');
-
-    peerConnection.onicecandidate = (e) => {
-      console.log('onicecandidate fired.');
-      if (e.candidate) {
-        _.forEach(remoteNegotiators, (negotiator) => {
-          send({
-            type: "candidate",
-            name: negotiator,
-            candidate: e.candidate,
+          // Peer connection
+          setRTCConfig({
+            iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
           });
-        })
-      }
-    };
-    peerConnection.onaddstream = async (e) => {
-      console.log('onaddstream event fired.');
-      setRemoteStreams([...remoteStreams, e.stream]);
-    };
 
-    peerConnection.addStream(stream);
+          const peerConnection = new RTCPeerConnection(RTCConfig);
+          window.peerConnection = peerConnection;
+          console.log('RTC connection has been created.');
 
-    // Signaling channel
-    const signalingChannel = io('http://localhost:3001');
-    signalingChannel.on('connect', () => {
-      send({
-        type: 'login',
-        name: localNegotiator,
-      })
-    });
-    signalingChannel.on('error', console.log);
-    signalingChannel.on('message', (message) => {
-      const { type, name, offer, answer, candidate } = JSON.parse(message);
+          peerConnection.onicecandidate = (e) => {
+            console.log('onicecandidate fired.');
+            if (e.candidate && peerConnection.canTrickleIceCandidates) {
+              _.forEach(remoteNegotiators, (negotiator) => {
+                send({
+                  type: "candidate",
+                  name: negotiator,
+                  candidate: e.candidate,
+                });
+              })
+            }
+          };
+          peerConnection.onaddstream = async (e) => {
+            console.log('onaddstream event fired.');
+            setRemoteStreams([...remoteStreams, e.stream]);
+          };
 
-      switch (type) {
-        case 'login':
-          onLogin(name);
-          break;
-        case 'offer':
-          onOffer(offer, name);
-          break;
-        case 'answer':
-          onAnswer(answer);
-          break;
-        case 'candidate':
-          onCandidate(candidate);
-          break;
-        default:
-          break;
-      }
-    });
+          peerConnection.addStream(stream);
 
-    const onLogin = async (name) => {
-      if (name !== localNegotiator && !_.includes(remoteNegotiators, name)) {
-        console.log('onLogin handler fired. Name:', name);
-        setRemoteNegotiators([...remoteNegotiators, name]);
-        peerConnection.createOffer()
-          .then((offer) => {
-            peerConnection.setLocalDescription(offer);
+          // Signaling channel
+          const signalingChannel = io('http://localhost:3001');
+          signalingChannel.on('connect', () => {
             send({
-              type: 'offer',
-              name,
-              offer,
-            });
-          })
-          .catch(console.log);
+              type: 'login',
+              name: localNegotiator,
+            })
+          });
+          signalingChannel.on('error', console.log);
+          signalingChannel.on('message', (message) => {
+            const { type, name, offer, answer, candidate } = JSON.parse(message);
+
+            switch (type) {
+              case 'login':
+                onLogin(name);
+                break;
+              case 'offer':
+                onOffer(offer, name);
+                break;
+              case 'answer':
+                onAnswer(answer);
+                break;
+              case 'candidate':
+                onCandidate(candidate);
+                break;
+              default:
+                break;
+            }
+          });
+
+          const onLogin = async (name) => {
+            if (name !== localNegotiator && !_.includes(remoteNegotiators, name)) {
+              console.log('onLogin handler fired. Name:', name);
+              setRemoteNegotiators([...remoteNegotiators, name]);
+              peerConnection.createOffer()
+                .then((offer) => {
+                  peerConnection.setLocalDescription(offer);
+                  send({
+                    type: 'offer',
+                    name,
+                    offer,
+                  });
+                })
+        .catch(console.log);
       }
     };
 
     const onOffer = async (offer, name) => {
       console.log('onOffer handler fired.');
-      peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-      peerConnection.createAnswer()
+      peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+        .then(() => peerConnection.createAnswer()
+          .then((answer) => {
+            peerConnection.setLocalDescription(answer);
+            return answer;
+          })
+          .catch(console.log)
+        )
+        .then(() => {
+          if (peerConnection.canTrickleIceCandidates) {
+            return peerConnection.localDescription;
+          }
+          return new Promise((resolve) => {
+            peerConnection.onicegatheringstatechange = (e) => {
+              if (e.target.iceGatheringState === 'complete') {
+                resolve(peerConnection.localDescription);
+              }
+            }
+          })
+        })
         .then((answer) => {
-          peerConnection.setLocalDescription(answer);
           send({
             type: "answer",
             name,
             answer,
           })
         })
-        .catch(console.log)
+        .catch(console.log);
     };
 
     const onAnswer = async (answer) => {
