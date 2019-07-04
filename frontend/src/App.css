@@ -1,8 +1,8 @@
-.App {
+.app {
   text-align: center;
 }
 
-.App-chat {
+.chat {
   background-color: #000;
   min-height: 100vh;
   display: flex;
@@ -10,7 +10,7 @@
   justify-content: center;
 }
 
-.App-chat-main {
+.chat-main {
   height: 74vh;
   width: 100vw;
   display: flex;
@@ -18,7 +18,7 @@
   align-items: center;
 }
 
-.App-chat-controls {
+.chat-controls {
   height: 8vh;
   display: flex;
   justify-content: center;
@@ -26,15 +26,13 @@
   margin-bottom: 20px;
 }
 
-.App-chat-controls button {
+.chat-controls button {
   margin: 0 8px !important;
 }
 
-.App-chat-videos {
+.chat-videos {
   width: 100vw;
-  display: grid;
-  grid-gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 45%));
-  grid-template-rows: 1fr;
-  justify-content: center;
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
 }

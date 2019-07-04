@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import  { Loader } from 'semantic-ui-react';
+import './video.css';
 
 export default (props) => {
     const [isReady, setIsReady] = useState(false);

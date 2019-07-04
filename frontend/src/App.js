@@ -16,8 +16,8 @@ const App = () => {
   const [RTCConfig, setRTCConfig] = useState({});
   const [roomID, setRoomID] = useState(getRoomID());
   const [isCapturedUserMedia, setIsCapturedUserMedia] = useState(false);
-  const [localNegotiator, setLocalNegotiator] = useState(createLogin());
-  const [remoteNegotiators, setRemoteNegotiators] = useState([]);
+  const [localParticipant, setLocalParticipant] = useState(createLogin());
+  const [remoteParticipants, setRemoteParticipants] = useState([]);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
 
@@ -45,10 +45,10 @@ const App = () => {
 
       peerConnection.addEventListener('icecandidate', (e) => {
         if (e.candidate && peerConnection.canTrickleIceCandidates) {
-          _.forEach(remoteNegotiators, (negotiator) => {
+          _.forEach(remoteParticipants, (participant) => {
             send({
               type: "candidate",
-              name: negotiator,
+              name: participant,
               candidate: e.candidate,
             });
           })
@@ -64,7 +64,7 @@ const App = () => {
       // Signaling channel
       const signalingChannel = io('http://localhost:3001');
       signalingChannel.on('connect', () =>
-        send({ type: 'login', name: localNegotiator })
+        send({ type: 'login', name: localParticipant })
       );
       signalingChannel.on('error', console.error);
       signalingChannel.on('message', (message) => {
@@ -89,8 +89,8 @@ const App = () => {
       });
 
       const onLogin = async (name) => {
-        if (name !== localNegotiator && !_.includes(remoteNegotiators, name)) {
-          setRemoteNegotiators([...remoteNegotiators, name]);
+        if (name !== localParticipant && !_.includes(remoteParticipants, name)) {
+          setRemoteParticipants([...remoteParticipants, name]);
           const offer = await peerConnection.createOffer();
           peerConnection.setLocalDescription(offer);
           send({ type: 'offer', name, offer });
@@ -98,8 +98,8 @@ const App = () => {
       };
 
       const onOffer = async (offer, name) => {
-        if (!_.includes(remoteNegotiators, name)) {
-          setRemoteNegotiators([...remoteNegotiators, name]);
+        if (!_.includes(remoteParticipants, name)) {
+          setRemoteParticipants([...remoteParticipants, name]);
         }
 
         await peerConnection.setRemoteDescription(offer)
@@ -135,23 +135,23 @@ const App = () => {
   }, []);
 
   return (
-    <div className="App">
-      <div className="App-chat">
-        <div className="App-chat-main">
-          <div className="App-chat-videos">
+    <div className="app">
+      <div className="chat">
+        <div className="chat-main">
+          <div className="chat-videos">
             {_.map(
               [localStream, ...remoteStreams],
               (stream, i) => (
                 <Video
                   stream={stream}
                   key={i}
-                  width={`${100 / (remoteNegotiators.length + 1)}%`}
+                  width="95%"
                 />
               )
             )}
           </div>
         </div>
-        <div className="App-chat-controls">
+        <div className="chat-controls">
           <Button
             onClick={() => copy(window.location.href)}
             color="green"
