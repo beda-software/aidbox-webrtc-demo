@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import copy from 'copy-text-to-clipboard';
 
 import Video from './components/video';
-import { createLogin, getRoomID, initRoom } from './components/room';
+import { createLogin, getRoomID, initRoom } from './utils';
 
 import 'semantic-ui-css/semantic.min.css';
 import  { Button } from 'semantic-ui-react';
@@ -23,145 +23,114 @@ const App = () => {
 
   useEffect(() => {
     const captureLocalMedia = async () => {
-      console.log('Capture local media...');
       return navigator.mediaDevices.getUserMedia({
         video: true,
         audio: false,
       });
     };
 
-    initRoom(roomID);
+    const startChat = async () => {
+      initRoom(roomID);
 
-    if (!isCapturedUserMedia) {
-      captureLocalMedia()
-        .then((stream) => {
-          setIsCapturedUserMedia(true);
-          setLocalStream(stream);
+      const stream = await captureLocalMedia();
+      setIsCapturedUserMedia(true);
+      setLocalStream(stream);
 
-          // Peer connection
-          setRTCConfig({
-            iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
-          });
+      // Peer connection
+      setRTCConfig({
+        iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
+      });
 
-          const peerConnection = new RTCPeerConnection(RTCConfig);
-          window.peerConnection = peerConnection;
-          console.log('RTC connection has been created.');
+      const peerConnection = new RTCPeerConnection(RTCConfig);
 
-          peerConnection.onicecandidate = (e) => {
-            console.log('onicecandidate fired.');
-            if (e.candidate && peerConnection.canTrickleIceCandidates) {
-              _.forEach(remoteNegotiators, (negotiator) => {
-                send({
-                  type: "candidate",
-                  name: negotiator,
-                  candidate: e.candidate,
-                });
-              })
-            }
-          };
-          peerConnection.onaddstream = async (e) => {
-            console.log('onaddstream event fired.');
-            setRemoteStreams([...remoteStreams, e.stream]);
-          };
-
-          peerConnection.addStream(stream);
-
-          // Signaling channel
-          const signalingChannel = io('http://localhost:3001');
-          signalingChannel.on('connect', () => {
+      peerConnection.addEventListener('icecandidate', (e) => {
+        if (e.candidate && peerConnection.canTrickleIceCandidates) {
+          _.forEach(remoteNegotiators, (negotiator) => {
             send({
-              type: 'login',
-              name: localNegotiator,
-            })
-          });
-          signalingChannel.on('error', console.log);
-          signalingChannel.on('message', (message) => {
-            const { type, name, offer, answer, candidate } = JSON.parse(message);
-
-            switch (type) {
-              case 'login':
-                onLogin(name);
-                break;
-              case 'offer':
-                onOffer(offer, name);
-                break;
-              case 'answer':
-                onAnswer(answer);
-                break;
-              case 'candidate':
-                onCandidate(candidate);
-                break;
-              default:
-                break;
-            }
-          });
-
-          const onLogin = async (name) => {
-            if (name !== localNegotiator && !_.includes(remoteNegotiators, name)) {
-              console.log('onLogin handler fired. Name:', name);
-              setRemoteNegotiators([...remoteNegotiators, name]);
-              peerConnection.createOffer()
-                .then((offer) => {
-                  peerConnection.setLocalDescription(offer);
-                  send({
-                    type: 'offer',
-                    name,
-                    offer,
-                  });
-                })
-        .catch(console.log);
-      }
-    };
-
-    const onOffer = async (offer, name) => {
-      console.log('onOffer handler fired.');
-      peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
-        .then(() => peerConnection.createAnswer()
-          .then((answer) => {
-            peerConnection.setLocalDescription(answer);
-            return answer;
+              type: "candidate",
+              name: negotiator,
+              candidate: e.candidate,
+            });
           })
-          .catch(console.log)
-        )
-        .then(() => {
-          if (peerConnection.canTrickleIceCandidates) {
-            return peerConnection.localDescription;
+        }
+      });
+
+      peerConnection.addEventListener('addstream', (e) => {
+        setRemoteStreams([...remoteStreams, e.stream]);
+      });
+
+      peerConnection.addStream(stream);
+
+      // Signaling channel
+      const signalingChannel = io('http://localhost:3001');
+      signalingChannel.on('connect', () =>
+        send({ type: 'login', name: localNegotiator })
+      );
+      signalingChannel.on('error', console.error);
+      signalingChannel.on('message', (message) => {
+        const { type, name, offer, answer, candidate } = JSON.parse(message);
+
+        switch (type) {
+          case 'login':
+            onLogin(name);
+            break;
+          case 'offer':
+            onOffer(offer, name);
+            break;
+          case 'answer':
+            onAnswer(answer);
+            break;
+          case 'candidate':
+            onCandidate(candidate);
+            break;
+          default:
+            break;
+        }
+      });
+
+      const onLogin = async (name) => {
+        if (name !== localNegotiator && !_.includes(remoteNegotiators, name)) {
+          setRemoteNegotiators([...remoteNegotiators, name]);
+          const offer = await peerConnection.createOffer();
+          peerConnection.setLocalDescription(offer);
+          send({ type: 'offer', name, offer });
+        }
+      };
+
+      const onOffer = async (offer, name) => {
+        if (!_.includes(remoteNegotiators, name)) {
+          setRemoteNegotiators([...remoteNegotiators, name]);
+        }
+
+        await peerConnection.setRemoteDescription(offer)
+        const answer = await peerConnection.createAnswer()
+        await peerConnection.setLocalDescription(answer);
+
+        if (peerConnection.canTrickleIceCandidates) {
+          return peerConnection.localDescription;
+        }
+
+        peerConnection.addEventListener('icegatheringstatechange', async (e) => {
+          if (e.target.iceGatheringState === 'complete') {
+            const answer = await peerConnection.localDescription;
+            send({ type: 'answer', name, answer });
           }
-          return new Promise((resolve) => {
-            peerConnection.onicegatheringstatechange = (e) => {
-              if (e.target.iceGatheringState === 'complete') {
-                resolve(peerConnection.localDescription);
-              }
-            }
-          })
         })
-        .then((answer) => {
-          send({
-            type: "answer",
-            name,
-            answer,
-          })
-        })
-        .catch(console.log);
-    };
+      };
 
-    const onAnswer = async (answer) => {
-      console.log('onAnswer handler fired.');
-      peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    };
+      const onAnswer = (answer) => {
+        peerConnection.setRemoteDescription(answer);
+      };
 
-    const onCandidate = async (candidate) => {
-      console.log('onCandidate handler fired.');
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    };
+      const onCandidate = (candidate) => {
+        peerConnection.addIceCandidate(candidate);
+      };
 
-    const send = async (message) => {
-      console.log('Send message to signaling channel: ', message);
-      signalingChannel.send(JSON.stringify(message));
-    };
-        })
-        .catch(console.log)
+      const send = (message) => {
+        signalingChannel.send(JSON.stringify(message));
+      };
     }
+    startChat();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
