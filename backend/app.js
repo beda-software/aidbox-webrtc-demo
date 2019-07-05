@@ -22,7 +22,7 @@ io.on('connection', function(connection) {
       }
 
       // Destruct if success
-      const { type, name, offer, answer, candidate } = data;
+      const { type, room, name, offer, answer, candidate } = data;
 
       //switching type of the user message
       switch (data.type) {
@@ -41,15 +41,17 @@ io.on('connection', function(connection) {
                //save user connection on the server
                users[name] = connection;
                connection.name = name;
+               connection.room = room;
 
-               // TODO: restrict mapping within current room
-               _.mapValues(users, (connection) => {
+               _.mapValues(
+                  _.filter(users, (connection) => connection.room === room),
+                  (connection) =>
                   sendTo(connection, {
                      type: "login",
                      name: name,
                      success: true
-                  });
-               })
+                  })
+               );
 
                console.log("User logged", name);
             }

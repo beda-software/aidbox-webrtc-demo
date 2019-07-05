@@ -15,7 +15,6 @@ import './App.css';
 const App = () => {
   const [RTCConfig, setRTCConfig] = useState({});
   const [roomID, setRoomID] = useState(getRoomID());
-  const [isCapturedUserMedia, setIsCapturedUserMedia] = useState(false);
   const [localParticipant, setLocalParticipant] = useState(createLogin());
   const [remoteParticipants, setRemoteParticipants] = useState([]);
   const [localStream, setLocalStream] = useState(null);
@@ -33,7 +32,6 @@ const App = () => {
       initRoom(roomID);
 
       const stream = await captureLocalMedia();
-      setIsCapturedUserMedia(true);
       setLocalStream(stream);
 
       // Peer connection
@@ -64,7 +62,7 @@ const App = () => {
       // Signaling channel
       const signalingChannel = io('http://localhost:3001');
       signalingChannel.on('connect', () =>
-        send({ type: 'login', name: localParticipant })
+        send({ type: 'login', name: localParticipant, room: roomID })
       );
       signalingChannel.on('error', console.error);
       signalingChannel.on('message', (message) => {
