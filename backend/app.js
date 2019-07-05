@@ -25,7 +25,7 @@ io.on('connection', function(connection) {
       const { type, room, name, offer, answer, candidate } = data;
 
       //switching type of the user message
-      switch (data.type) {
+      switch (type) {
          //when a user tries to login
 
          case "login":
@@ -65,7 +65,7 @@ io.on('connection', function(connection) {
             //if UserB exists then send him offer details
             var conn = users[name];
 
-            if(conn != null) {
+            if (conn != null) {
                //setting that UserA connected with UserB
                connection.otherName = name;
 
@@ -116,6 +116,19 @@ io.on('connection', function(connection) {
                });
             }
 
+            break;
+
+         case "checking":
+            if (room) {
+               console.log(`Checking for room '${room}...'`);
+               const isExistRoom = !!_.find(users, {room});
+               console.log(`Is exist room? ${isExistRoom}`);
+               sendTo(connection, {
+                  type: "checking",
+                  room,
+                  status: isExistRoom
+               });
+            }
             break;
 
          default:
