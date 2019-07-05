@@ -1,0 +1,24 @@
+dependencies: \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/Demangle.cpp \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/Demangle.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/FBString.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/CppAttributes.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/Portability.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/portability/Config.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/CPortability.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/Traits.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/hash/Hash.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/Utility.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/functional/ApplyTuple.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/functional/Invoke.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/Preprocessor.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/hash/SpookyHashV1.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/hash/SpookyHashV2.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/lang/Bits.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/ConstexprMath.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/lang/Assume.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/portability/Builtins.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/lang/Exception.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/memory/Malloc.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/memory/detail/MallocImpl.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/third-party/folly-2018.10.22.00/folly/detail/Demangle.h

@@ -1,0 +1,13 @@
+dependencies: \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/SurfaceHostingView/RCTSurfaceHostingView.mm \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/SurfaceHostingView/RCTSurfaceHostingView.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/RCTSurfaceDelegate.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/RCTSurfaceStage.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/RCTDefines.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/DevSupport/RCTInspectorDevServerHelper.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/DevSupport/RCTPackagerConnection.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/SurfaceHostingView/RCTSurfaceSizeMeasureMode.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/RCTSurface.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/Surface/RCTSurfaceView.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/RCTUtils.h \
+  /Users/jussiemion/beda-software/react-native-demo/node_modules/react-native/React/Base/RCTAssert.h
