@@ -13,6 +13,7 @@ export default (props) => {
         }
     }
 
+    // TODO: why I should use ref? Try avoid that
     return props.stream && (
         <div className="video-container">
             <video

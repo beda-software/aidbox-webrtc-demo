@@ -17,7 +17,8 @@ export function getRoomID() {
           .value()
 }
 
-export function initRoom (roomID) {
+// TODO: rename function
+export function initRoom(roomID) {
     window.history.replaceState(
         {},
         `Room: ${roomID}`,

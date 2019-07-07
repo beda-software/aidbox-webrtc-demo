@@ -12,7 +12,9 @@ import  { Button } from 'semantic-ui-react';
 
 import './App.css';
 
+// TODO: reorganize logic into one external hook (learn React tutorials)
 const App = () => {
+  // TODO: look around organize state (like single object or current view)
   const [RTCConfig, setRTCConfig] = useState({});
   const [roomID, setRoomID] = useState(getRoomID());
   const [localParticipant, setLocalParticipant] = useState(createLogin());
@@ -60,6 +62,7 @@ const App = () => {
       peerConnection.addStream(stream);
 
       // Signaling channel
+      // TODO: replace hardcoded address with environment variable
       const signalingChannel = io('http://localhost:3001');
       signalingChannel.on('connect', () =>
         send({ type: 'login', name: localParticipant, room: roomID })

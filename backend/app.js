@@ -96,8 +96,9 @@ io.on('connection', function(connection) {
 
          case "candidate":
             console.log(`Sending candidate to ${name}`);
+            // TODO: why I use connection instead conn?
             var conn = users[name];
-            sendTo(connection, {
+            sendTo(conn, {
                type: "candidate",
                candidate: candidate
             });
