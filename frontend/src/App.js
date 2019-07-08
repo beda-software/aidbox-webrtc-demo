@@ -63,10 +63,10 @@ const App = () => {
 
       // Signaling channel
       // TODO: replace hardcoded address with environment variable
-      const signalingChannel = io('http://localhost:3001');
-      signalingChannel.on('connect', () =>
-        send({ type: 'login', name: localParticipant, room: roomID })
-      );
+      const signalingChannel = io('http://localhost:3001', { transports: ["websocket"]});
+      signalingChannel.on('connect', () => {
+        send({ type: 'login', name: localParticipant, room: roomID });
+      });
       signalingChannel.on('error', console.error);
       signalingChannel.on('message', (message) => {
         const { type, name, offer, answer, candidate } = JSON.parse(message);

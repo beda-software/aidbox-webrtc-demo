@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
 
 import { createLogin } from './components/room';
 
@@ -33,9 +32,10 @@ async function requestCameraPermission() {
       return true;
     } else {
       console.log('Camera permission denied');
+      return false;
     }
   } catch (err) {
-    console.warn(err);
+    console.err(err);
   }
 }
 
@@ -51,13 +51,9 @@ const App = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
 
-  // Signaling channel
-  const signalingChannel = io('http://127.0.0.53:3001', {
-    transports: ["polling"]
-  });
-
   useEffect(() => {
     const captureLocalMedia = async () => {
+      console.log("Capture local media...");
       return mediaDevices.getUserMedia({
         video: true,
         audio: false,
@@ -69,7 +65,8 @@ const App = () => {
       const isGranted = await requestCameraPermission();
       if (!isGranted) return
       setLocalStream(stream);
-      console.log(localParticipant);
+      console.log("localParticipant", localParticipant);
+      console.log("isGranted", isGranted);
 
       const peerConnection = new RTCPeerConnection(RTCConfig);
 
@@ -91,27 +88,37 @@ const App = () => {
 
       peerConnection.addStream(stream);
 
-      signalingChannel.on('connect', () => {
+      // Signaling channel
+      const signalingChannel = new WebSocket('ws://localhost:3001');
+      console.log(signalingChannel);
+
+      signalingChannel.onopen = () => {
         console.log('Connection established');
-        send({ type: 'login', name: localParticipant, room: roomID })
-      });
-      signalingChannel.on('error', console.error);
-      signalingChannel.on('message', (message) => {
+        send({ type: 'login', name: localParticipant, room: roomID });
+      };
+
+      signalingChannel.onerror = (err) => console.warn(err);
+
+      signalingChannel.addEventListener('message', (message) => {
         console.log('message', message);
         const { type, name, offer, answer, candidate, roomID, status } = JSON.parse(message);
 
         switch (type) {
           case 'login':
             onLogin(name);
+            console.log('onLogin fired.');
             break;
           case 'offer':
             onOffer(offer, name);
+            console.log('onOffer fired.');
             break;
           case 'answer':
             onAnswer(answer);
+            console.log('onAnswer fired.');
             break;
           case 'candidate':
             onCandidate(candidate);
+            console.log('onCandidate fired.');
             break;
           case 'checking':
             onChecking(roomID, status)
