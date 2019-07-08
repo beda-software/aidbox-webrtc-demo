@@ -12,10 +12,39 @@ import {
   mediaDevices
 } from 'react-native-webrtc';
 
+import {PermissionsAndroid} from 'react-native';
+
+async function requestCameraPermission() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      {
+        title: 'Cool Photo App Camera Permission',
+        message:
+          'Cool Photo App needs access to your camera ' +
+          'so you can take awesome pictures.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can use the camera');
+      return true;
+    } else {
+      console.log('Camera permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
 import s from './style';
 
 const App = () => {
-  const [RTCConfig, setRTCConfig] = useState({});
+  const [RTCConfig, setRTCConfig] = useState({
+    iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
+  });
   const [roomID, setRoomID] = useState(null);
   const [localParticipant, setLocalParticipant] = useState(createLogin());
   const [remoteParticipants, setRemoteParticipants] = useState([]);
@@ -23,7 +52,9 @@ const App = () => {
   const [remoteStreams, setRemoteStreams] = useState([]);
 
   // Signaling channel
-  const signalingChannel = io('http://localhost:3001');
+  const signalingChannel = io('http://127.0.0.53:3001', {
+    transports: ["polling"]
+  });
 
   useEffect(() => {
     const captureLocalMedia = async () => {
@@ -35,12 +66,10 @@ const App = () => {
 
     const startChat = async () => {
       const stream = await captureLocalMedia();
+      const isGranted = await requestCameraPermission();
+      if (!isGranted) return
       setLocalStream(stream);
-
-      // Peer connection
-      setRTCConfig({
-        iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
-      });
+      console.log(localParticipant);
 
       const peerConnection = new RTCPeerConnection(RTCConfig);
 
@@ -63,6 +92,7 @@ const App = () => {
       peerConnection.addStream(stream);
 
       signalingChannel.on('connect', () => {
+        console.log('Connection established');
         send({ type: 'login', name: localParticipant, room: roomID })
       });
       signalingChannel.on('error', console.error);
