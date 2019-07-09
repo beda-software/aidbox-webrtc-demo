@@ -63,7 +63,7 @@ const App = () => {
 
       // Signaling channel
       // TODO: replace hardcoded address with environment variable
-      const signalingChannel = new WebSocket('wss://webrtc.beda.software/');
+      const signalingChannel = new WebSocket('ws://localhost:3001/ws');
       signalingChannel.addEventListener('open', () => {
         send({ type: 'login', name: localParticipant, room: roomID });
       });

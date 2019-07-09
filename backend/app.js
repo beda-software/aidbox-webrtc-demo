@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 server.listen(3001);
 
-const wsServer = new ws.Server({ server });
+const wsServer = new ws.Server({ server, path: '/ws' });
 
 var users = {};
 
