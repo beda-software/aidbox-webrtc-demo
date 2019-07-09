@@ -51,6 +51,10 @@ const App = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
 
+  // Signaling channel
+  const signalingChannel = new WebSocket('wss://webrtc.beda.software');
+  console.log(signalingChannel);
+
   useEffect(() => {
     const captureLocalMedia = async () => {
       console.log("Capture local media...");
@@ -87,10 +91,6 @@ const App = () => {
       });
 
       peerConnection.addStream(stream);
-
-      // Signaling channel
-      const signalingChannel = new WebSocket('ws://localhost:3001');
-      console.log(signalingChannel);
 
       signalingChannel.onopen = () => {
         console.log('Connection established');
