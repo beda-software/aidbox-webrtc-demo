@@ -63,12 +63,13 @@ const App = () => {
 
       // Signaling channel
       // TODO: replace hardcoded address with environment variable
-      const signalingChannel = io('http://localhost:3001', { transports: ["websocket"]});
-      signalingChannel.on('connect', () => {
+      const signalingChannel = new WebSocket('ws://localhost:3001/');
+      signalingChannel.addEventListener('open', () => {
         send({ type: 'login', name: localParticipant, room: roomID });
       });
-      signalingChannel.on('error', console.error);
-      signalingChannel.on('message', (message) => {
+      signalingChannel.addEventListener('error', console.error);
+      signalingChannel.addEventListener('message', (event) => {
+        const { data:message } = event;
         const { type, name, offer, answer, candidate } = JSON.parse(message);
 
         switch (type) {

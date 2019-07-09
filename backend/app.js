@@ -1,13 +1,18 @@
-var app = require('express')();
-var server = require('http').Server(app);
-var io = require('socket.io')(server, { path: "/", transports: ["websocket"], host: '0.0.0.0' });
-var _ = require('lodash');
+const express  = require('express'),
+      http     = require('http'),
+      ws       = require('ws'),
+      _        = require('lodash');
 
+const app = express();
+
+const server = http.createServer(app);
 server.listen(3001);
+
+const wsServer = new ws.Server({ server });
 
 var users = {};
 
-io.on('connection', function(connection) {
+wsServer.on('connection', function(connection) {
    console.log("User connected");
 
    connection.on('message', function(message) {
