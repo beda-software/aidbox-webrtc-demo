@@ -64,7 +64,8 @@ const App = () => {
       // TODO: replace hardcoded address with environment variable
       const signalingChannel = new WebSocket('ws://localhost:3001/ws');
       signalingChannel.addEventListener('open', () => {
-        send({ type: 'login', name: localParticipant, room: roomID });
+        send({ type: 'login', name: localParticipant });
+        send({ type: 'join-room', name: localParticipant, room: roomID });
       });
       signalingChannel.addEventListener('error', console.error);
       signalingChannel.addEventListener('message', (event) => {

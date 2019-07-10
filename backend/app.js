@@ -46,21 +46,18 @@ wsServer.on('connection', function(connection) {
                //save user connection on the server
                users[name] = connection;
                connection.name = name;
-               connection.room = room;
-
-               _.mapValues(
-                  _.filter(users, (connection) => connection.room === room),
-                  (connection) =>
-                  sendTo(connection, {
-                     type: "login",
-                     name,
-                     success: true
-                  })
-               );
 
                console.log("User logged", name);
             }
 
+            break;
+
+         case 'join-room':
+            if (room) {
+               connection.room = room;
+               console.log('Notify other participants about new peer...');
+               joinRoom(room, name);
+            };
             break;
 
          case "offer":
@@ -174,6 +171,21 @@ wsServer.on('connection', function(connection) {
 
 });
 
+function joinRoom(room, name) {
+   _.mapValues(
+      _.filter(users, (conn) =>
+         conn.room === room &&
+         conn.name !== name
+      ),
+      (conn) =>
+      sendTo(conn, {
+         type: "login",
+         name,
+         success: true
+      })
+   );
+};
+
 function sendTo(connection, message) {
    connection.send(JSON.stringify(message));
-}
+};
