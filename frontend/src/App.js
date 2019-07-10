@@ -38,15 +38,15 @@ const App = () => {
       // Peer connection
       setRTCConfig({
         iceServers: [
-	    {
-                url: 'turn:82.202.236.141:3478',
-                credential: 'tah8uaP1',
-                username: 'turnuser',
-            },
-	    {
-		url: 'stun:stun.1.google.com:19302',
-	    },
-	],
+    	    {
+            url: 'turn:82.202.236.141:3478',
+            credential: 'tah8uaP1',
+            username: 'turnuser',
+          },
+          {
+            url: 'stun:stun.1.google.com:19302',
+          },
+	      ],
       });
 
       const peerConnection = new RTCPeerConnection(RTCConfig);
@@ -70,8 +70,7 @@ const App = () => {
       peerConnection.addStream(stream);
 
       // Signaling channel
-      // TODO: replace hardcoded address with environment variable
-      const signalingChannel = new WebSocket('ws://localhost:3001/ws');
+      const signalingChannel = new WebSocket(process.env.REACT_APP_LOCAL_ADDRESS);
       signalingChannel.addEventListener('open', () => {
         send({ type: 'login', name: localParticipant });
         send({ type: 'join-room', name: localParticipant, room: roomID });
