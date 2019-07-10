@@ -9,3 +9,7 @@
         max-width: none;
     }
 }
+
+video {
+    max-height: 46vh;
+}
