@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 import { createLogin } from './components/room';
 
-import { SafeAreaView, View, TextInput } from 'react-native';
+import { Platform, SafeAreaView, View, TextInput } from 'react-native';
 import {
   RTCPeerConnection,
   RTCView,
@@ -64,7 +64,9 @@ const App = () => {
 
     const startChat = async () => {
       const stream = await captureLocalMedia();
-      const isGranted = await requestCameraPermission();
+      // We have permissions for iOS already (declared in info.plist)
+      const isGranted = Platform.OS === "ios" || await requestCameraPermission();
+
       if (!isGranted) {
         return;
       };
@@ -142,20 +144,20 @@ const App = () => {
           setRemoteParticipants([...remoteParticipants, name]);
         }
 
-        await peerConnection.setRemoteDescription(offer)
-        const answer = await peerConnection.createAnswer()
+        await peerConnection.setRemoteDescription(offer);
+        const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
 
         if (peerConnection.canTrickleIceCandidates) {
           return peerConnection.localDescription;
         }
 
-        peerConnection.addEventListener('icegatheringstatechange', async (e) => {
-          if (e.target.iceGatheringState === 'complete') {
-            const answer = await peerConnection.localDescription;
-            send({ type: 'answer', name, answer });
-          }
-        })
+        // peerConnection.addEventListener('icegatheringstatechange', async (e) => {
+        //   if (e.target.iceGatheringState === 'complete') {
+        //     const answer = await peerConnection.localDescription;
+        //     send({ type: 'answer', name, answer });
+        //   };
+        // });
       };
 
       const onAnswer = (answer) => {
