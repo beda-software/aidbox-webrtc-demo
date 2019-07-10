@@ -53,7 +53,7 @@ wsServer.on('connection', function(connection) {
                   (connection) =>
                   sendTo(connection, {
                      type: "login",
-                     name: name,
+                     name,
                      success: true
                   })
                );
@@ -125,14 +125,17 @@ wsServer.on('connection', function(connection) {
             break;
 
          case "checking":
+            var conn = users[name];
+
             if (room) {
                console.log(`Checking for room '${room}...'`);
                const isExistRoom = !!_.find(users, {room});
                console.log(`Is exist room? ${isExistRoom}`);
-               sendTo(connection, {
+               sendTo(conn, {
                   type: "checking",
                   room,
-                  status: isExistRoom
+                  status: isExistRoom,
+                  name,
                });
             }
             break;

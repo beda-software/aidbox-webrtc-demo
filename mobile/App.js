@@ -52,12 +52,11 @@ const App = () => {
   const [remoteStreams, setRemoteStreams] = useState([]);
 
   // Signaling channel
-  const signalingChannel = new WebSocket('wss://webrtc.beda.software');
+  const signalingChannel = new WebSocket('wss://webrtc.beda.software/ws/');
   console.log(signalingChannel);
 
   useEffect(() => {
     const captureLocalMedia = async () => {
-      console.log("Capture local media...");
       return mediaDevices.getUserMedia({
         video: true,
         audio: false,
@@ -67,10 +66,12 @@ const App = () => {
     const startChat = async () => {
       const stream = await captureLocalMedia();
       const isGranted = await requestCameraPermission();
-      if (!isGranted) return
+      if (!isGranted) {
+        return;
+      };
+
       setLocalStream(stream);
       console.log("localParticipant", localParticipant);
-      console.log("isGranted", isGranted);
 
       const peerConnection = new RTCPeerConnection(RTCConfig);
 
@@ -92,16 +93,15 @@ const App = () => {
 
       peerConnection.addStream(stream);
 
-      signalingChannel.onopen = () => {
+      signalingChannel.addEventListener('open', () => {
         console.log('Connection established');
         send({ type: 'login', name: localParticipant, room: roomID });
-      };
+      });
 
-      signalingChannel.onerror = (err) => console.warn(err);
-
-      signalingChannel.addEventListener('message', (message) => {
-        console.log('message', message);
+      signalingChannel.addEventListener('message', (event) => {
+        const { data:message } = event;
         const { type, name, offer, answer, candidate, roomID, status } = JSON.parse(message);
+        console.log('Got message ', JSON.parse(message));
 
         switch (type) {
           case 'login':
@@ -183,7 +183,11 @@ const App = () => {
     signalingChannel.send(JSON.stringify(message));
   };
 
-  const joinToChat = (text) => send({ type: "checking", room: text });
+  const joinToChat = (text) => send({
+    type: "checking",
+    name: localParticipant,
+    room: text
+  });
 
   return (
     <SafeAreaView style={{ flex: 1}}>

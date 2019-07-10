@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
 import copy from 'copy-text-to-clipboard';
 
 import Video from './components/video';
