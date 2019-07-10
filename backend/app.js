@@ -8,8 +8,7 @@ const app = express();
 const server = http.createServer(app);
 server.listen(3001);
 
-const wsServer = new ws.Server({ server, path: '/ws' });
-
+const wsServer = new ws.Server({ server, path: '/ws/' });
 var users = {};
 
 wsServer.on('connection', function(connection) {
@@ -28,7 +27,6 @@ wsServer.on('connection', function(connection) {
 
       // Destruct if success
       const { type, room, name, offer, answer, candidate } = data;
-
       //switching type of the user message
       switch (type) {
          //when a user tries to login
@@ -54,7 +52,8 @@ wsServer.on('connection', function(connection) {
 
          case 'join-room':
             if (room) {
-               connection.room = room;
+               var conn = users[name];
+               conn.room = room;
                console.log('Notify other participants about new peer...');
                joinRoom(room, name);
             };
@@ -125,14 +124,13 @@ wsServer.on('connection', function(connection) {
             var conn = users[name];
 
             if (room) {
-               console.log(`Checking for room '${room}...'`);
+               console.log(`Checking for room '${room}'...`);
                const isExistRoom = !!_.find(users, {room});
                console.log(`Is exist room? ${isExistRoom}`);
                sendTo(conn, {
                   type: "checking",
-                  room,
+                  roomID: room,
                   status: isExistRoom,
-                  name,
                });
             }
             break;

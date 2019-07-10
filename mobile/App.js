@@ -53,7 +53,6 @@ const App = () => {
 
   // Signaling channel
   const signalingChannel = new WebSocket('wss://webrtc.beda.software/ws/');
-  console.log(signalingChannel);
 
   useEffect(() => {
     const captureLocalMedia = async () => {
@@ -95,7 +94,7 @@ const App = () => {
 
       signalingChannel.addEventListener('open', () => {
         console.log('Connection established');
-        send({ type: 'login', name: localParticipant, room: roomID });
+        send({ type: 'login', name: localParticipant });
       });
 
       signalingChannel.addEventListener('message', (event) => {
@@ -121,7 +120,7 @@ const App = () => {
             console.log('onCandidate fired.');
             break;
           case 'checking':
-            onChecking(roomID, status)
+            onChecking(roomID, status);
             console.log('onChecking fired.');
             break;
           default:
@@ -168,9 +167,9 @@ const App = () => {
       };
 
       const onChecking = (roomID, status) => {
-        if (status === 'success') {
+        if (status) {
           setRoomID(roomID);
-          console.log('roomID: ', roomID);
+          send({ type: 'join-room', name: localParticipant, room: roomID });
         }
       };
     }
@@ -183,10 +182,10 @@ const App = () => {
     signalingChannel.send(JSON.stringify(message));
   };
 
-  const joinToChat = (text) => send({
+  const joinToChat = (room) => send({
     type: "checking",
     name: localParticipant,
-    room: text
+    room,
   });
 
   return (
@@ -204,7 +203,7 @@ const App = () => {
           (stream, i) => (
             <RTCView
               style={s.rtcView}
-              streamURL={stream.id}
+              streamURL={stream.toURL()}
               key={i}
             />
           )
