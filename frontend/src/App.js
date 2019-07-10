@@ -37,7 +37,11 @@ const App = () => {
 
       // Peer connection
       setRTCConfig({
-        iceServers: [{ url: 'stun:stun.1.google.com:19302' }],
+        iceServers: [{
+            urls: 'turn:82.202.236.141:3478',
+            credential: 'tah8uaP1',
+            username: 'turnuser',
+        }],
       });
 
       const peerConnection = new RTCPeerConnection(RTCConfig);
