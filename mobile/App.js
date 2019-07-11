@@ -152,12 +152,12 @@ const App = () => {
           return peerConnection.localDescription;
         }
 
-        // peerConnection.addEventListener('icegatheringstatechange', async (e) => {
-        //   if (e.target.iceGatheringState === 'complete') {
-        //     const answer = await peerConnection.localDescription;
-        //     send({ type: 'answer', name, answer });
-        //   };
-        // });
+        peerConnection.addEventListener('icegatheringstatechange', async (e) => {
+          if (e.target.iceGatheringState === 'complete') {
+            const answer = await peerConnection.localDescription;
+            send({ type: 'answer', name, answer });
+          };
+        });
       };
 
       const onAnswer = (answer) => {

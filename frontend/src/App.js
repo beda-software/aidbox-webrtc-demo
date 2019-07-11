@@ -20,6 +20,7 @@ const App = () => {
   const [remoteParticipants, setRemoteParticipants] = useState([]);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
+  const [iceCandidates, setIceCandidates] = useState([]);
 
   useEffect(() => {
     const captureLocalMedia = async () => {
@@ -52,15 +53,9 @@ const App = () => {
       const peerConnection = new RTCPeerConnection(RTCConfig);
 
       peerConnection.addEventListener('icecandidate', (e) => {
-        if (e.candidate && peerConnection.canTrickleIceCandidates) {
-          _.forEach(remoteParticipants, (participant) => {
-            send({
-              type: "candidate",
-              name: participant,
-              candidate: e.candidate,
-            });
-          })
-        }
+        if (e.candidate) {
+          setIceCandidates(e.candidate);
+        };
       });
 
       peerConnection.addEventListener('addstream', (e) => {
@@ -101,6 +96,7 @@ const App = () => {
       const onLogin = async (name) => {
         if (name !== localParticipant && !_.includes(remoteParticipants, name)) {
           setRemoteParticipants([...remoteParticipants, name]);
+          sendIceCandidates(remoteParticipants);
           const offer = await peerConnection.createOffer();
           peerConnection.setLocalDescription(offer);
           send({ type: 'offer', name, offer });
@@ -110,6 +106,7 @@ const App = () => {
       const onOffer = async (offer, name) => {
         if (!_.includes(remoteParticipants, name)) {
           setRemoteParticipants([...remoteParticipants, name]);
+          sendIceCandidates(remoteParticipants);
         }
 
         await peerConnection.setRemoteDescription(offer)
@@ -127,6 +124,30 @@ const App = () => {
           }
         })
       };
+
+      const sendIceCandidates = (participants) => {
+        switch(peerConnection.canTrickleIceCandidates) {
+          case true:
+            _.forEach(participants, (participant) => {
+              _.forEach(iceCandidates, (candidate) => {
+                send({
+                  type: "candidate",
+                  name: participant,
+                  candidate: candidate,
+                });
+              });
+            })
+            break;
+          case false:
+            console.warn("Remote peer can't accept trickled ICE candidates");
+            break;
+          case null:
+            console.warn('No remote peer has been established.');
+            break
+          default:
+            break;
+        }
+      }
 
       const onAnswer = (answer) => {
         peerConnection.setRemoteDescription(answer);
