@@ -3,6 +3,7 @@ version: '2.1'
 services:
   frontend:
     build: ./frontend
+    env_file: .env
     environment:
       NODE_ENV: production
     ports:
