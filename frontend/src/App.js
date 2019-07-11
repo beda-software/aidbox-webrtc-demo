@@ -65,7 +65,7 @@ const App = () => {
       peerConnection.addStream(stream);
 
       // Signaling channel
-      const signalingChannel = new WebSocket(process.env.REACT_SERVER_ADDRESS);
+      const signalingChannel = new WebSocket(process.env.REACT_APP_BACKEND_BASE_URL || 'ws://localhost:3001/ws/');
       signalingChannel.addEventListener('open', () => {
         send({ type: 'login', name: localParticipant });
         send({ type: 'join-room', name: localParticipant, room: roomID });
