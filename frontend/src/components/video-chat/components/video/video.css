@@ -1,8 +1,9 @@
-.video-container {
-    width: 100%;
-    max-width: 50vw;
-    height: 100%;
+.app-chat .video-container {
+    max-width: fit-content !important;
     position: relative;
+    margin: 0 !important;
+    display: flex;
+    justify-content: center;
 }
 
 @media screen and (max-width: 768px) {

@@ -1,222 +1,80 @@
 import _ from 'lodash';
 
 import React, { useState, useEffect } from 'react';
-import copy from 'copy-text-to-clipboard';
+import useBus, { dispatch as emit } from 'use-bus';
 
-import Video from './components/video';
-import { createLogin, getRoomID, initRoom } from './utils';
-
+import  { Container, Grid } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
-import  { Button } from 'semantic-ui-react';
 
+import { createRoom, createLogin } from './utils/room';
+
+import SignalingChannel from './components/signaling';
+import VideoChat from './components/video-chat';
+import Controls from './components/controls';
 import './App.css';
 
-// TODO: reorganize logic into one external hook (learn React tutorials)
+
 const App = () => {
-  // TODO: look around organize state (like single object or current view)
-  const [RTCConfig, setRTCConfig] = useState({});
-  const [roomID, setRoomID] = useState(getRoomID());
-  const [localParticipant, setLocalParticipant] = useState(createLogin());
+  const [room,               setRoom]               = useState(createRoom());
+  const [localParticipant,   setLocalParticipant]   = useState(createLogin());
   const [remoteParticipants, setRemoteParticipants] = useState([]);
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStreams, setRemoteStreams] = useState([]);
-  const [iceCandidates, setIceCandidates] = useState([]);
 
   useEffect(() => {
-    const captureLocalMedia = async () => {
-      return navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
-      });
-    };
-
-    const startChat = async () => {
-      initRoom(roomID);
-
-      const stream = await captureLocalMedia();
-      setLocalStream(stream);
-
-      // Peer connection
-      setRTCConfig({
-        iceServers: [
-    	    {
-            url: 'turn:82.202.236.141:3478',
-            credential: 'tah8uaP1',
-            username: 'turnuser',
-          },
-          {
-            url: 'stun:stun.1.google.com:19302',
-          },
-	      ],
-      });
-
-      const peerConnection = new RTCPeerConnection(RTCConfig);
-
-      peerConnection.addEventListener('icecandidate', (e) => {
-        if (e.candidate) {
-          setIceCandidates(e.candidate);
-        };
-      });
-
-      peerConnection.addEventListener('addstream', (e) => {
-        setRemoteStreams([...remoteStreams, e.stream]);
-      });
-
-      peerConnection.addStream(stream);
-
-      // Signaling channel
-      const signalingChannel = new WebSocket(process.env.REACT_APP_BACKEND_BASE_URL || 'ws://localhost:3001/ws/');
-      signalingChannel.addEventListener('open', () => {
-        send({ type: 'login', name: localParticipant });
-        send({ type: 'join-room', name: localParticipant, room: roomID });
-      });
-      signalingChannel.addEventListener('error', console.error);
-      signalingChannel.addEventListener('message', (event) => {
-        const { data:message } = event;
-        const { type, name, offer, answer, candidate } = JSON.parse(message);
-
-        switch (type) {
-          case 'login':
-            onLogin(name);
-            break;
-          case 'offer':
-            onOffer(offer, name);
-            break;
-          case 'answer':
-            onAnswer(answer);
-            break;
-          case 'candidate':
-            onCandidate(candidate);
-            break;
-          default:
-            break;
-        }
-      });
-
-      const onLogin = async (name) => {
-        if (name !== localParticipant && !_.includes(remoteParticipants, name)) {
-          setRemoteParticipants([...remoteParticipants, name]);
-          sendIceCandidates(remoteParticipants);
-          const offer = await peerConnection.createOffer();
-          peerConnection.setLocalDescription(offer);
-          send({ type: 'offer', name, offer });
-        }
-      };
-
-      const onOffer = async (offer, name) => {
-        if (!_.includes(remoteParticipants, name)) {
-          setRemoteParticipants([...remoteParticipants, name]);
-          sendIceCandidates(remoteParticipants);
-        }
-
-        await peerConnection.setRemoteDescription(offer)
-        const answer = await peerConnection.createAnswer()
-        await peerConnection.setLocalDescription(answer);
-
-        if (peerConnection.canTrickleIceCandidates) {
-          return peerConnection.localDescription;
-        }
-
-        peerConnection.addEventListener('icegatheringstatechange', async (e) => {
-          if (e.target.iceGatheringState === 'complete') {
-            const answer = await peerConnection.localDescription;
-            send({ type: 'answer', name, answer });
-          }
-        })
-      };
-
-      const sendIceCandidates = (participants) => {
-        switch(peerConnection.canTrickleIceCandidates) {
-          case true:
-            _.forEach(participants, (participant) => {
-              _.forEach(iceCandidates, (candidate) => {
-                send({
-                  type: "candidate",
-                  name: participant,
-                  candidate: candidate,
-                });
-              });
-            })
-            break;
-          case false:
-            console.warn("Remote peer can't accept trickled ICE candidates");
-            break;
-          case null:
-            console.warn('No remote peer has been established.');
-            break
-          default:
-            break;
-        }
-      }
-
-      const onAnswer = (answer) => {
-        peerConnection.setRemoteDescription(answer);
-      };
-
-      const onCandidate = (candidate) => {
-        peerConnection.addIceCandidate(candidate);
-      };
-
-      const send = (message) => {
-        signalingChannel.send(JSON.stringify(message));
-      };
-    }
-    startChat();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Notify signaling server about new participant
+    emit({ type: "login", login: localParticipant });
+    emit({ type: "join-room", login: localParticipant, room });
   }, []);
 
+  // Listen signaling channel
+
+  useBus("response-join-room", (data) => {
+    addRemoteParticipant(data.response.login)
+  });
+
+  useBus("response-logout", (data) => {
+    removeRemoteParticipant(data.response.login);
+  });
+
+  // Room
+
+  const addRemoteParticipant = (login) => {
+    setRemoteParticipants((prevRemoteParticipants) => {
+      return [...prevRemoteParticipants, login]
+    });
+  };
+
+  const removeRemoteParticipant = (login) => {
+    setRemoteParticipants((prevRemoteParticipants) => {
+      return _.without(prevRemoteParticipants, login)
+    });
+  };
+
   return (
-    <div className="app">
-      <div className="chat">
-        <div className="chat-main">
-          <div className="chat-videos">
-            {_.map(
-              [localStream, ...remoteStreams],
-              (stream, i) => (
-                <Video
-                  stream={stream}
-                  key={i}
-                  width="95%"
-                  height="100%"
-                />
-              )
-            )}
-          </div>
-        </div>
-        <div className="chat-controls">
-          <Button
-            onClick={() => copy(window.location.href)}
-            color="green"
-            icon="share alternate"
-            circular
-          />
-          <Button
-            icon="microphone"
-            size="big"
-            circular
-            disabled
-          />
-          <Button
-            color="red"
-            icon="phone"
-            size="big"
-            circular
-            disabled
-          />
-          <Button
-            icon="video"
-            size="big"
-            circular
-            disabled
-          />
-          <Button
-            icon="circle"
-            circular
-            disabled
-          />
-        </div>
-      </div>
-    </div>
+    <Container
+      className="app"
+      fluid
+    >
+      <Grid className="app-chat">
+        <SignalingChannel />
+
+        <Grid.Row className="app-chat-debug">
+          <p>Participants: {
+            _.map(
+              [localParticipant, ...remoteParticipants],
+              (p) => `${p} `)
+            }
+          </p>
+        </Grid.Row>
+
+        <VideoChat
+          localParticipant={localParticipant}
+          remoteParticipants={remoteParticipants}
+        />
+
+        <Controls />
+
+      </Grid>
+    </Container>
   )
 };
 

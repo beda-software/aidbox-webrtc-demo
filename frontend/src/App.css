@@ -1,39 +1,49 @@
-.app {
-  text-align: center;
+#root {
+  font-size: 18px;
+  color: limegreen;
 }
 
-.chat {
-  background-color: #000;
-  min-height: 100vh;
+#root .app {
+  height: 100vh;
+  margin: 0 !important;
+  background-color: black;
+  overflow: hidden;
+}
+
+#root .app .app-chat {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column
+}
+
+#root .app .app-chat .app-chat-row {
+  padding: 0;
+  height: fit-content;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+#root .app .app-chat .app-chat-debug {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-}
-
-.chat-main {
-  height: 80vh;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
   align-items: center;
 }
 
-.chat-controls {
-  height: 8vh;
+#root .app .app-chat .app-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  position: absolute;
+  bottom: 0;
+  height: 20vh;
 }
 
-.chat-controls button {
-  margin: 0 8px !important;
-}
-
-.chat-videos {
-  width: 100vw;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 20px;
+#root .app .app-controls button {
+  margin: 0 6px;
 }

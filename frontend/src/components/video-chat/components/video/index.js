@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import  { Loader } from 'semantic-ui-react';
+import  { Container, Loader } from 'semantic-ui-react';
 import './video.css';
 
 export default (props) => {
+    const { stream, key, width, height } = props;
+
     const [isReady, setIsReady] = useState(false);
 
     const onReadyStateChange = (e) => {
@@ -14,24 +16,24 @@ export default (props) => {
     }
 
     // TODO: why I should use ref? Try avoid that
-    return props.stream && (
-        <div className="video-container">
+    return stream && (
+        <Container className="video-container">
             <video
                 onLoadedData={onReadyStateChange}
-                key={props.key}
+                key={key}
                 ref={(video) => {
                     if (video) {
-                        video.srcObject = props.stream;
-                    }
+                        video.srcObject = stream;
+                    };
                 }}
                 autoPlay
-                width={props.width}
-                height={props.height}
+                width={width}
+                height={height}
                 style={{
                     display: isReady ? 'initial' : 'none',
                 }}
             />
             <Loader active={!isReady} />
-        </div>
+        </Container>
     )
 }

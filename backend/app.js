@@ -9,130 +9,84 @@ const server = http.createServer(app);
 server.listen(3001);
 
 const wsServer = new ws.Server({ server, path: '/ws/' });
-var users = {};
+let users = {};
 
 wsServer.on('connection', function(connection) {
    console.log("User connected");
 
-   connection.on('message', function(message) {
+   connection.on('message', (message) => {
 
-      var data;
-      //accepting only JSON messages
-      try {
-         data = JSON.parse(message);
-      } catch (e) {
-         console.log("Invalid JSON");
-         data = {};
-      }
+      let data = parseMessage(message);
+      let { type, room, login, offer, answer, candidate } = data;
+      let conn = users[login];
 
-      // Destruct if success
-      const { type, room, name, offer, answer, candidate } = data;
-      //switching type of the user message
       switch (type) {
-         //when a user tries to login
 
          case "login":
-            //if anyone is logged in with this username then refuse
 
-            if(users[name]) {
+            if(users[login]) {
                sendTo(connection, {
                   type: "login",
-                  name: name,
+                  login,
                   success: false
                });
             } else {
-               //save user connection on the server
-               users[name] = connection;
-               connection.name = name;
-
-               console.log("User logged", name);
-            }
+               users[login] = connection;
+               connection.login = login;
+               sendTo(connection, {
+                  type: "login",
+                  login,
+                  success: true
+               });
+               console.log("User logged", login);
+            };
 
             break;
 
          case 'join-room':
-            if (room) {
-               var conn = users[name];
-               conn.room = room;
-               console.log('Notify other participants about new peer...');
-               joinRoom(room, name);
-            };
+            conn.room = room;
+            joinRoom(room, login);
             break;
 
          case "offer":
-            //for ex. UserA wants to call UserB
-            console.log("Sending offer to: ", name);
+            console.log("Sending offer to: ", login);
 
-            //if UserB exists then send him offer details
-            var conn = users[name];
-
-            if (conn != null) {
-               //setting that UserA connected with UserB
-               connection.otherName = name;
-
+            if (conn !== null) {
                sendTo(conn, {
                   type: "offer",
-                  offer: offer,
-                  name: connection.name
+                  offer,
+                  login,
                });
-            }
+            };
 
             break;
 
          case "answer":
-            console.log("Sending answer to: ", name);
-            //for ex. UserB answers UserA
-            var conn = users[name];
+            console.log("Sending answer to: ", login);
 
-            if(conn != null) {
-               connection.otherName = name;
+            if(conn !== null) {
                sendTo(conn, {
                   type: "answer",
-                  answer: answer,
-                  name: connection.name,
+                  answer,
+                  login,
                });
-            }
+            };
 
             break;
 
          case "candidate":
-            console.log(`Sending candidate to ${name}`);
-            // TODO: why I use connection instead conn?
-            var conn = users[name];
-            sendTo(conn, {
-               type: "candidate",
-               candidate: candidate
-            });
+            console.log(`Sending candidate to ${login}`);
+            if (conn !== null) {
+               sendTo(conn, {
+                  type: "candidate",
+                  candidate,
+               });
+            };
 
             break;
 
-         case "leave":
-            console.log("Disconnecting from", name);
-            var conn = users[name];
-            conn.otherName = null;
-
-            //notify the other user so he can disconnect his peer connection
-            if(conn != null) {
-               sendTo(conn, {
-                  type: "leave"
-               });
-            }
-
-            break;
-
-         case "checking":
-            var conn = users[name];
-
-            if (room) {
-               console.log(`Checking for room '${room}'...`);
-               const isExistRoom = !!_.find(users, {room});
-               console.log(`Is exist room? ${isExistRoom}`);
-               sendTo(conn, {
-                  type: "checking",
-                  roomID: room,
-                  status: isExistRoom,
-               });
-            }
+         case "logout":
+            leaveRoom(room, login);
             break;
 
          default:
@@ -141,47 +95,86 @@ wsServer.on('connection', function(connection) {
                type: "error",
                message: "Command not found: " + type
             });
-
             break;
       }
    });
 
-   connection.on("close", function() {
+   connection.on("close", () => {
+      const { login, room } = connection;
 
-      if(connection.name) {
-      delete users[connection.name];
-
-         if(connection.otherName) {
-            console.log("Disconnecting from ", connection.otherName);
-            var conn = users[connection.otherName];
-            conn.otherName = null;
-
-            if(conn != null) {
-               sendTo(conn, {
-                  type: "leave"
-               });
-            }
-         }
-      }
+      leaveRoom(room, login);
+      console.log(`Disconnecting from ${login}.`);
    });
 
    connection.send(JSON.stringify({status: "success"}));
 
 });
 
-function joinRoom(room, name) {
-   _.mapValues(
-      _.filter(users, (conn) =>
-         conn.room === room &&
-         conn.name !== name
-      ),
-      (conn) =>
-      sendTo(conn, {
-         type: "login",
-         name,
-         success: true
+// Room: high-level methods
+
+function joinRoom(room, initiator) {
+   console.log(`User ${initiator} is joining to ${room}.`);
+   let conn = users[initiator];
+   conn.room = room;
+
+   notifyRoom(room, {
+      type: "join-room",
+      login: initiator,
+   });
+
+   _.forEach(
+      getAllRemoteParticipants(room, initiator),
+      (participant) => sendTo(conn, {
+         type: "join-room",
+         login: participant.login,
       })
    );
+};
+
+function leaveRoom(room, initiator) {
+   notifyRoom(room, {
+      type: "logout",
+      login: initiator,
+   });
+   delete users[initiator];
+};
+
+// Room: low-level methods
+
+function notifyRoom(room, message) {
+   const { login:initiator } = message;
+   const participants = initiator
+      ? getAllRemoteParticipants(room, initiator)
+      : getAllParticipants(room);
+
+   _.forEach(
+      participants,
+      (participant) => sendTo(participant, message)
+   );
+};
+
+function getAllParticipants(room) {
+   return _.filter(users, (user) => user.room === room);
+};
+
+function getAllRemoteParticipants(room, initiator) {
+   return _.filter(
+      getAllParticipants(room),
+      (user) => user.login !== initiator
+   );
+};
+
+// Server: low-level methods
+
+function parseMessage(message) {
+   let data;
+   try {
+      data = JSON.parse(message);
+   } catch (e) {
+      console.log("Invalid JSON");
+      data = {};
+   }
+   return data;
 };
 
 function sendTo(connection, message) {
