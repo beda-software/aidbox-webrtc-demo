@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
 import  { Container, Grid } from 'semantic-ui-react';
@@ -19,33 +19,38 @@ const App = () => {
   const [localParticipant,   setLocalParticipant]   = useState(createLogin());
   const [remoteParticipants, setRemoteParticipants] = useState([]);
 
-  useEffect(() => {
-    // Notify signaling server about new participant
+  // Enter room when local media is ready
+
+  useBus("media-captured", () => {
     emit({ type: "login", login: localParticipant });
     emit({ type: "join-room", login: localParticipant, room });
-  }, []);
+  });
 
   // Listen signaling channel
 
-  useBus("response-join-room", (data) => {
-    addRemoteParticipant(data.response.login)
+  useBus("response-wait-offer", ({ login }) => {
+    addRemoteParticipant({ isWaitingOffer: true, login});
   });
 
-  useBus("response-logout", (data) => {
-    removeRemoteParticipant(data.response.login);
+  useBus("response-join-room", ({ login }) => {
+    addRemoteParticipant({ isWaitingOffer: false, login });
+  });
+
+  useBus("response-logout", ({ login }) => {
+    removeRemoteParticipant(_.find(remoteParticipants, { login }));
   });
 
   // Room
 
-  const addRemoteParticipant = (login) => {
+  const addRemoteParticipant = (participant) => {
     setRemoteParticipants((prevRemoteParticipants) => {
-      return [...prevRemoteParticipants, login]
+      return [...prevRemoteParticipants, participant]
     });
   };
 
-  const removeRemoteParticipant = (login) => {
+  const removeRemoteParticipant = (participant) => {
     setRemoteParticipants((prevRemoteParticipants) => {
-      return _.without(prevRemoteParticipants, login)
+      return _.without(prevRemoteParticipants, participant)
     });
   };
 
@@ -61,7 +66,7 @@ const App = () => {
           <p>Participants: {
             _.map(
               [localParticipant, ...remoteParticipants],
-              (p) => `${p} `)
+              (p) => `${p.login || p} `)
             }
           </p>
         </Grid.Row>
