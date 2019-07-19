@@ -146,7 +146,7 @@ export default ({
 
   const send = (type, message) => {
     emit({
-      from: localParticipant.login,
+      from: localParticipant,
       to: remoteParticipant.login,
       type,
       [type]: message,
@@ -155,7 +155,7 @@ export default ({
 
   return stream && (
     <Video
-      stream={localStream}
+      stream={stream}
       key={key}
       width="95%"
       height="100%"

@@ -31,7 +31,7 @@ export default ({ localParticipant, remoteParticipants }) => {
       {localStream && (
         <Video
           stream={localStream}
-          key={localParticipant.login}
+          key={localParticipant}
           width="95%"
           height="100%"
         />
@@ -40,7 +40,7 @@ export default ({ localParticipant, remoteParticipants }) => {
         remoteParticipants,
         (participant) => (
           <RTCConnection
-            localParticipant={participant}
+            localParticipant={localParticipant}
             localStream={localStream}
             remoteParticipant={participant}
             key={participant.login}
