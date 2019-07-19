@@ -3,9 +3,7 @@ import 'semantic-ui-css/semantic.min.css';
 import  { Container, Loader } from 'semantic-ui-react';
 import './video.css';
 
-export default (props) => {
-    const { stream, key, width, height } = props;
-
+export default ({ stream, key, width, height }) => {
     const [isReady, setIsReady] = useState(false);
 
     const onReadyStateChange = (e) => {

@@ -37,18 +37,21 @@ export default ({
   useEffect(() => {
     if (connection && offer) {
       sendAnswer();
-    }
+    };
   }, [connection, offer]);
 
   useEffect(() => {
     if (connection && answer) {
+      console.log(connection);
       connection.setRemoteDescription(answer);
-    }
+    };
   }, [connection, answer])
 
   useEffect(() => {
-    _.forEach(candidates, sendCandidate);
-  }, [candidates]);
+    if (connection && candidates.length) {
+      _.forEach(candidates, sendCandidate);
+    };
+  }, [connection, candidates]);
 
   // Connection
 
@@ -107,7 +110,15 @@ export default ({
   };
 
   function onCandidate({ candidate }) {
-    connection.addIceCandidate(candidate);
+    if (connection) {
+      connection.addIceCandidate(candidate);
+    } else {
+      // TODO: fix this case
+      console.error(
+        "Connection doesn't exist, but got candidate",
+        candidate,
+      );
+    }
   };
 
   // Wrapper for emitting messages to global event bus
