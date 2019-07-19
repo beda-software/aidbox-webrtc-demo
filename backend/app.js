@@ -51,7 +51,7 @@ wsServer.on('connection', function(connection) {
             break;
 
          case "offer":
-            console.log(`Sending offer to: ${to}`);
+            console.log(`Sending offer from ${from} to: ${to}`);
 
             if (conn !== null) {
                sendTo(conn, {
@@ -65,7 +65,7 @@ wsServer.on('connection', function(connection) {
             break;
 
          case "answer":
-            console.log(`Sending answer to: ${to}`);
+            console.log(`Sending answer from ${from} to: ${to}`);
 
             if(conn !== null) {
                sendTo(conn, {
@@ -79,7 +79,7 @@ wsServer.on('connection', function(connection) {
             break;
 
          case "candidate":
-            console.log(`Sending candidate to ${to}`);
+            console.log(`Sending candidate from ${from} to ${to}`);
             if (conn !== null) {
                sendTo(conn, {
                   type: "candidate",

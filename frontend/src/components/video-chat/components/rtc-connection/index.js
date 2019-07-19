@@ -50,6 +50,8 @@ export default ({
     _.forEach(candidates, sendCandidate);
   }, [candidates]);
 
+  // Connection
+
   const createConnection = () => {
     const conn = new RTCPeerConnection(config.connection);
 
@@ -68,6 +70,8 @@ export default ({
 
     return conn;
   };
+
+  // Sending handlers
 
   async function sendOffer() {
     const offer = await connection.createOffer();
@@ -90,6 +94,8 @@ export default ({
     send("candidate", candidate);
   };
 
+  // Receivers
+
   async function onOffer({ offer }) {
     console.log("Got offer", offer);
     setOffer(offer);
@@ -103,6 +109,8 @@ export default ({
   function onCandidate({ candidate }) {
     connection.addIceCandidate(candidate);
   };
+
+  // Wrapper for emitting messages to global event bus
 
   const send = (type, message) => {
     emit({

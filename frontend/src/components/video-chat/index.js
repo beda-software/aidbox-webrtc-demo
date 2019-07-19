@@ -43,7 +43,7 @@ export default ({ localParticipant, remoteParticipants }) => {
             localParticipant={participant}
             localStream={localStream}
             remoteParticipant={participant}
-            key={participant}
+            key={participant.login}
           />
         )
       )}

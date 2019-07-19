@@ -38,7 +38,7 @@ const App = () => {
 
   useBus("response-logout", ({ login }) => {
     removeRemoteParticipant(_.find(remoteParticipants, { login }));
-  });
+  }, [remoteParticipants]);
 
   // Room
 
