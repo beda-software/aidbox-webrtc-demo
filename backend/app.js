@@ -17,8 +17,9 @@ wsServer.on('connection', function(connection) {
    connection.on('message', (message) => {
 
       let data = parseMessage(message);
-      let { type, room, login, offer, answer, candidate } = data;
-      let conn = users[login];
+      let { type, room, from, to, login, offer, answer, candidate } = data;
+      const receiver = login || to;
+      let conn = users[receiver];
 
       switch (type) {
 
@@ -30,6 +31,7 @@ wsServer.on('connection', function(connection) {
                   login,
                   success: false
                });
+               console.log(`User ${login} exists already`);
             } else {
                users[login] = connection;
                connection.login = login;
@@ -38,48 +40,52 @@ wsServer.on('connection', function(connection) {
                   login,
                   success: true
                });
-               console.log("User logged", login);
+               console.log(`User logged ${login}`);
             };
 
             break;
 
-         case 'join-room':
+         case "join-room":
             conn.room = room;
             joinRoom(room, login);
             break;
 
          case "offer":
-            console.log("Sending offer to: ", login);
+            console.log(`Sending offer to: ${to}`);
 
             if (conn !== null) {
                sendTo(conn, {
                   type: "offer",
                   offer,
-                  login,
+                  from,
+                  to,
                });
             };
 
             break;
 
          case "answer":
-            console.log("Sending answer to: ", login);
+            console.log(`Sending answer to: ${to}`);
 
             if(conn !== null) {
                sendTo(conn, {
                   type: "answer",
                   answer,
-                  login,
+                  from,
+                  to,
                });
             };
 
             break;
 
          case "candidate":
-            console.log(`Sending candidate to ${login}`);
+            console.log(`Sending candidate to ${to}`);
             if (conn !== null) {
                sendTo(conn, {
                   type: "candidate",
                   candidate,
+                  from,
+                  to,
                });
             };
 
@@ -90,10 +96,10 @@ wsServer.on('connection', function(connection) {
             break;
 
          default:
-            console.log('Unknown:', data);
+            console.log(`Unknown: ${data}`);
             sendTo(connection, {
                type: "error",
-               message: "Command not found: " + type
+               message: `Command not found: ${type}`,
             });
             break;
       }
@@ -105,47 +111,44 @@ wsServer.on('connection', function(connection) {
       leaveRoom(room, login);
       console.log(`Disconnecting from ${login}.`);
    });
-
-   connection.send(JSON.stringify({status: "success"}));
-
 });
 
 // Room: high-level methods
 
-function joinRoom(room, initiator) {
-   console.log(`User ${initiator} is joining to ${room}.`);
-   let conn = users[initiator];
+function joinRoom(room, login) {
+   console.log(`User ${login} is joining to ${room}.`);
+   let conn = users[login];
    conn.room = room;
 
+   // Notify room about new participant
    notifyRoom(room, {
       type: "join-room",
-      login: initiator,
+      login,
    });
 
+   // Send signal by participants about ready for receiving RTC offer
    _.forEach(
-      getAllRemoteParticipants(room, initiator),
+      getAllRemoteParticipants(room, login),
       (participant) => sendTo(conn, {
-         type: "join-room",
+         type: "wait-offer",
          login: participant.login,
       })
    );
 };
 
-function leaveRoom(room, initiator) {
+function leaveRoom(room, login) {
    notifyRoom(room, {
       type: "logout",
-      login: initiator,
+      login,
    });
-   delete users[initiator];
+   delete users[login];
 };
 
 // Room: low-level methods
 
 function notifyRoom(room, message) {
-   const { login:initiator } = message;
-   const participants = initiator
-      ? getAllRemoteParticipants(room, initiator)
-      : getAllParticipants(room);
+   const { login } = message;
+   const participants = getAllRemoteParticipants(room, login);
 
    _.forEach(
       participants,
@@ -157,10 +160,10 @@ function getAllParticipants(room) {
    return _.filter(users, (user) => user.room === room);
 };
 
-function getAllRemoteParticipants(room, initiator) {
+function getAllRemoteParticipants(room, login) {
    return _.filter(
       getAllParticipants(room),
-      (user) => user.login !== initiator
+      (user) => user.login !== login
    );
 };
 
