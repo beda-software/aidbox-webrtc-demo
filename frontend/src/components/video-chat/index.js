@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 import React, { useState, useEffect } from 'react';
-import usePrevious from '@rooks/use-previous';
 import useBus, { dispatch as emit } from 'use-bus';
 
 import  { Grid } from 'semantic-ui-react';
@@ -10,35 +9,41 @@ import 'semantic-ui-css/semantic.min.css';
 import { getLocalMedia } from 'utils/media';
 
 import Video from './components/video';
+import RTCConnection from './components/rtc-connection';
 
 
-export default (props) => {
-  const [localStream,     setLocalStream]     = useState(null);
-  const [remoteStreams,   setRemoteStreams]   = useState([]);
+export default ({ localParticipant, remoteParticipants }) => {
+  const [localStream, setLocalStream] = useState(null);
 
   useEffect(() => {
-    if (props.localParticipant) {
-      initLocalStream();
-    };
-  }, [props.localParticipant]);
+    initLocalStream();
+  }, []);
 
   // Local media
 
   const initLocalStream = async () => {
     setLocalStream(await getLocalMedia());
-    console.log("Local media has been captured.");
+    emit("media-captured");
   };
 
   return (
     <Grid.Row className="app-chat-row app-chat-main">
+      {localStream && (
+        <Video
+          stream={localStream}
+          key={localParticipant.login}
+          width="95%"
+          height="100%"
+        />
+      )}
       {_.map(
-        [localStream, ...remoteStreams],
-        (stream) => stream && (
-          <Video
-            stream={stream}
-            key={stream.id}
-            width="95%"
-            height="100%"
+        remoteParticipants,
+        (participant) => (
+          <RTCConnection
+            localParticipant={participant}
+            localStream={localStream}
+            remoteParticipant={participant}
+            key={participant}
           />
         )
       )}

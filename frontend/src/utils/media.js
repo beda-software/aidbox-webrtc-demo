@@ -5,6 +5,5 @@ const captureMedia = async (config) => {
 };
 
 export async function getLocalMedia() {
-    const { localMedia } = config;
-    return await captureMedia(localMedia);
+    return await captureMedia(config.localMedia);
 };
