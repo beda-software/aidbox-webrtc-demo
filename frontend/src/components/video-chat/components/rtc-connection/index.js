@@ -58,15 +58,8 @@ export default ({
   const createConnection = () => {
     const conn = new RTCPeerConnection(config.connection);
 
-    conn.addEventListener('icecandidate', ({ candidate }) => {
-      if (candidate) {
-        setCandidates([...candidates, candidate]);
-      };
-    });
-
-    conn.addEventListener('addstream', ({ stream }) => {
-      setStream(stream);
-    });
+    conn.addEventListener('icecandidate', onIceCandidate);
+    conn.addEventListener('addstream',    onAddStream);
 
     // TODO: replace code below with addTrack method
     conn.addStream(localStream);
@@ -89,6 +82,15 @@ export default ({
     const answer = await connection.createAnswer();
     await connection.setLocalDescription(answer);
 
+    if (connection.canTrickleIceCandidates) {
+      return connection.localDescription;
+    }
+
+    connection.addEventListener(
+      "icegatheringstatechange",
+      onIceGatheringStateChange
+    );
+
     console.log("Send answer", answer);
     send('answer', answer);
   };
@@ -97,7 +99,7 @@ export default ({
     send("candidate", candidate);
   };
 
-  // Receivers
+  // General RTC receivers
 
   async function onOffer({ offer }) {
     console.log("Got offer", offer);
@@ -118,6 +120,25 @@ export default ({
         "Connection doesn't exist, but got candidate",
         candidate,
       );
+    }
+  };
+
+  // RTC connection listeners
+
+  const onIceCandidate = ({ candidate }) => {
+    if (candidate) {
+      setCandidates([...candidates, candidate]);
+    };
+  };
+
+  const onAddStream = ({ stream }) => {
+    setStream(stream);
+  };
+
+  const onIceGatheringStateChange = async (e) => {
+    if (e.target.iceGatheringState === "complete") {
+      const answer = await connection.localDescription;
+      send("answer", answer);
     }
   };
 
