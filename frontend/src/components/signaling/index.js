@@ -8,35 +8,40 @@ const socket = new WebSocket(
 );
 
 export default () => {
-  const [channel,   setChannel]   = useState(socket);
+  const [channel,    setChannel]    = useState(socket);
 
-  const [login,     setLogin]     = useState(null);
-  const [joinRoom,  setJoinRoom]  = useState(null);
-  const [logout,    setLogout]    = useState(null);
+  const [login,      setLogin]      = useState(null);
+  const [joinRoom,   setJoinRoom]   = useState(null);
+  const [logout,     setLogout]     = useState(null);
 
-  const [offer,     setOffer]     = useState(null);
-  const [answer,    setAnswer]    = useState(null);
-  const [candidate, setCandidate] = useState(null);
+  const [waitOffer,  setWaitOffer]  = useState(null);
+  const [offer,      setOffer]      = useState(null);
+  const [answer,     setAnswer]     = useState(null);
+  const [candidate,  setCandidate]  = useState(null);
 
-  useBus("login",     send);
-  useBus("join-room", send);
-  useBus("logout",    send);
+  useBus("login",      send);
+  useBus("join-room",  send);
+  useBus("logout",     send);
 
-  useBus("offer",     send);
-  useBus("answer",    send);
-  useBus("candidate", send);
+  useBus("wait-offer", send);
+  useBus("offer",      send);
+  useBus("answer",     send);
+  useBus("candidate",  send);
 
   useEffect(() => {
     if (login) {
-      emit({ type: "response-login", response: login });
+      emit({
+        ...login,
+        type: "response-login",
+      });
     };
   }, [login]);
 
   useEffect(() => {
     if (joinRoom) {
       emit({
+        ...joinRoom,
         type: "response-join-room",
-        response: joinRoom,
       });
     };
   }, [joinRoom]);
@@ -44,18 +49,26 @@ export default () => {
   useEffect(() => {
     if (logout) {
       emit({
+        ...logout,
         type: "response-logout",
-        response: logout,
       });
     };
   }, [logout]);
 
   useEffect(() => {
+    if (waitOffer) {
+      emit({
+        ...waitOffer,
+        type: "response-wait-offer",
+      });
+    };
+  }, [waitOffer]);
+
+  useEffect(() => {
     if (offer) {
       emit({
-        type: "transfer-offer",
-        response: offer,
-        login,
+        ...offer,
+        type: "response-offer",
       });
     };
   }, [offer]);
@@ -63,9 +76,8 @@ export default () => {
   useEffect(() => {
     if (answer) {
       emit({
-        type: "transfer-answer",
-        response: answer,
-        login,
+        ...answer,
+        type: "response-answer",
       });
     };
   }, [answer]);
@@ -73,9 +85,8 @@ export default () => {
   useEffect(() => {
     if (candidate) {
       emit({
-        type: "transfer-candidate",
-        response: candidate,
-        login,
+        ...candidate,
+        type: "response-candidate",
       });
     };
   }, [candidate]);
@@ -96,6 +107,9 @@ export default () => {
         break;
       case "logout":
         setLogout(message);
+        break;
+      case "wait-offer":
+        setWaitOffer(message);
         break;
       case "offer":
         setOffer(message);
@@ -123,7 +137,6 @@ export default () => {
   };
 
   function send(message) {
-    console.log("TCL: send -> message", message)
     channel.send(JSON.stringify(message));
   };
 
