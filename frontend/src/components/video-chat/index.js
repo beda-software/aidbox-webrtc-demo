@@ -15,6 +15,20 @@ import RTCConnection from './components/rtc-connection';
 export default ({ localParticipant, remoteParticipants }) => {
   const [localStream, setLocalStream] = useState(null);
 
+  useBus("mute-micro", ({ participant }) => {
+    if (participant === localParticipant) {
+      muteMicro(localStream);
+      emit("response-mute-micro");
+    };
+  }, [localStream, localParticipant]);
+
+  useBus("unmute-micro", ({ participant }) => {
+    if (participant === localParticipant) {
+      unmuteMicro(localStream);
+      emit("response-unmute-micro")
+    };
+  }, [localStream, localParticipant]);
+
   useEffect(() => {
     initLocalStream();
   }, []);
@@ -24,6 +38,14 @@ export default ({ localParticipant, remoteParticipants }) => {
   const initLocalStream = async () => {
     setLocalStream(await getLocalMedia());
     emit("media-captured");
+  };
+
+  const muteMicro = (stream) => {
+    _.first(stream.getAudioTracks()).enabled = false;
+  };
+
+  const unmuteMicro = (stream) => {
+    _.first(stream.getAudioTracks()).enabled = true;
   };
 
   return (

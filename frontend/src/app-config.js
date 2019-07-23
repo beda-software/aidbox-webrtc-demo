@@ -1,7 +1,7 @@
 export default {
     localMedia: {
         video: true,
-        audio: false,
+        audio: true,
     },
     connection: {
         iceServers: [

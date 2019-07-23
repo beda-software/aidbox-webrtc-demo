@@ -1,11 +1,24 @@
 import copy from 'copy-text-to-clipboard';
 
-import React from 'react';
+import React, { useState } from 'react';
+import useBus, { dispatch as emit } from 'use-bus';
 
 import  { Grid, Button } from 'semantic-ui-react';
 
 
-export default (props) => {
+export default ({ localParticipant }) => {
+  const [isMute, setIsMute] = useState(false);
+
+  useBus("response-mute-micro",   () => setIsMute(true));
+  useBus("response-unmute-micro", () => setIsMute(false));
+
+  const toggleMicro = () => {
+    emit({
+      type: `${isMute ? "unmute" : "mute"}-micro`,
+      participant: localParticipant,
+    });
+  };
+
   return (
     <Grid.Row className="app-chat-row app-controls">
       <Button
@@ -16,10 +29,11 @@ export default (props) => {
         circular
       />
       <Button
-        icon="microphone"
+        onClick={toggleMicro}
+        color={isMute ? "green" : "red"}
+        icon={isMute ? "microphone" : "microphone slash"}
         size="big"
         circular
-        disabled
       />
       <Button
         color="red"

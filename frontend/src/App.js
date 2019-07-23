@@ -76,7 +76,9 @@ const App = () => {
           remoteParticipants={remoteParticipants}
         />
 
-        <Controls />
+        <Controls
+          localParticipant={localParticipant}
+        />
 
       </Grid>
     </Container>
