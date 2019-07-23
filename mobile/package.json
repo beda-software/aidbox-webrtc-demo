@@ -11,7 +11,9 @@
     "react": "16.8.3",
     "react-native": "0.59.9",
     "react-native-webrtc": "^1.69.2",
-    "socket.io-client": "^2.2.0"
+    "copy-text-to-clipboard": "^2.1.0",
+    "use-bus": "^2.1.0",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
@@ -19,7 +21,13 @@
     "babel-jest": "^24.8.0",
     "jest": "^24.8.0",
     "metro-react-native-babel-preset": "^0.54.1",
-    "react-test-renderer": "16.8.3"
+    "react-test-renderer": "16.8.3",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react-hooks": "^1.6.1"
   },
   "jest": {
     "preset": "react-native"
