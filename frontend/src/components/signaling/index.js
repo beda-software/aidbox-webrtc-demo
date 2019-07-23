@@ -7,7 +7,7 @@ const socket = new WebSocket(
   "ws://localhost:3001/ws/"
 );
 
-export default () => {
+const SignalingChannel = () => {
   const [channel,    setChannel]    = useState(socket);
 
   const [login,      setLogin]      = useState(null);
@@ -34,7 +34,7 @@ export default () => {
         ...login,
         type: "response-login",
       });
-    };
+    }
   }, [login]);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default () => {
         ...joinRoom,
         type: "response-join-room",
       });
-    };
+    }
   }, [joinRoom]);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default () => {
         ...logout,
         type: "response-logout",
       });
-    };
+    }
   }, [logout]);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default () => {
         ...waitOffer,
         type: "response-wait-offer",
       });
-    };
+    }
   }, [waitOffer]);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default () => {
         ...offer,
         type: "response-offer",
       });
-    };
+    }
   }, [offer]);
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default () => {
         ...answer,
         type: "response-answer",
       });
-    };
+    }
   }, [answer]);
 
   useEffect(() => {
@@ -88,12 +88,13 @@ export default () => {
         ...candidate,
         type: "response-candidate",
       });
-    };
+    }
   }, [candidate]);
 
   useEffect(() => {
     channel.addEventListener("message", transferMessage);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel]);
 
   function transferMessage({ data }) {
     const message = parseMessage(data);
@@ -122,8 +123,8 @@ export default () => {
         break;
       default:
         break;
-    };
-  };
+    }
+  }
 
   function parseMessage(message) {
     let data;
@@ -134,11 +135,13 @@ export default () => {
       data = {};
     }
     return data;
-  };
+  }
 
   function send(message) {
     channel.send(JSON.stringify(message));
-  };
+  }
 
   return null;
-}
+};
+
+export default SignalingChannel;

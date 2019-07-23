@@ -6,7 +6,7 @@ import useBus, { dispatch as emit } from 'use-bus';
 import  { Grid, Button } from 'semantic-ui-react';
 
 
-export default ({ localParticipant }) => {
+const Controls = ({ localParticipant }) => {
   const [isMute, setIsMute] = useState(false);
 
   useBus("response-mute-micro",   () => setIsMute(true));
@@ -57,3 +57,5 @@ export default ({ localParticipant }) => {
     </Grid.Row>
   )
 }
+
+export default Controls;

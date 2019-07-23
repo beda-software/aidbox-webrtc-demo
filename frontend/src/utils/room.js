@@ -9,17 +9,17 @@ function getRoomID() {
             .slice(1)
             .join('')
             .value()
-    };
+    }
 
     return uuidv4();
-};
+}
 
 export function createLogin() {
     return _.chain(uuidv4())
         .split('-', 1)
         .first()
         .value();
-};
+}
 
 export function createRoom() {
     const roomID = getRoomID();
@@ -31,4 +31,4 @@ export function createRoom() {
         );
     }
     return roomID;
-};
+}
