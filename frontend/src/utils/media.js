@@ -1,7 +1,7 @@
 import config from 'app-config';
 
-const captureMedia = async (config) => {
-    return navigator.mediaDevices.getUserMedia(config);
+const captureMedia = async (mediaOptions) => {
+    return navigator.mediaDevices.getUserMedia(mediaOptions);
 };
 
 export async function getLocalMedia() {

@@ -1,37 +1,17 @@
-import React, { useState } from 'react';
-import 'semantic-ui-css/semantic.min.css';
-import  { Container, Loader } from 'semantic-ui-react';
-import './video.css';
+import React from 'react';
 
-export default ({ stream, key, width, height }) => {
-    const [isReady, setIsReady] = useState(false);
+import VideoUI from './video-ui';
 
-    const onReadyStateChange = (e) => {
-        const { readyState } = e.target;
-        if (readyState === 4) {
-            setIsReady(true);
-        }
-    }
 
-    // TODO: why I should use ref? Try avoid that
-    return stream && (
-        <Container className="video-container">
-            <video
-                onLoadedData={onReadyStateChange}
-                key={key}
-                ref={(video) => {
-                    if (video) {
-                        video.srcObject = stream;
-                    };
-                }}
-                autoPlay
-                width={width}
-                height={height}
-                style={{
-                    display: isReady ? 'initial' : 'none',
-                }}
-            />
-            <Loader active={!isReady} />
-        </Container>
-    )
-}
+const Video = ({ stream, key, width, height }) => {
+    return (
+        <VideoUI
+            stream={stream}
+            key={key}
+            width={width}
+            height={height}
+        />
+    );
+};
+
+export default Video;

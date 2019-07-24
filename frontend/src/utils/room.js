@@ -1,8 +1,11 @@
+import isReactNative from './platform';
+
 import _ from 'lodash';
 import uuidv4 from 'uuid';
 
+
 function getRoomID() {
-    if (window) {
+    if (!isReactNative()) {
         return window.location.pathname === '/'
         ? uuidv4()
         : _.chain(window.location.pathname)
@@ -23,7 +26,7 @@ export function createLogin() {
 
 export function createRoom() {
     const roomID = getRoomID();
-    if (window) {
+    if (!isReactNative()) {
         window.history.pushState(
             {},
             `Room: ${roomID}`,
