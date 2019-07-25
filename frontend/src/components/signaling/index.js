@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
+import SignalingChannelUI from './signaling-channel-ui';
+
 
 const socket = new WebSocket(
     process.env.REACT_APP_BACKEND_BASE_URL ||
@@ -140,7 +142,9 @@ const SignalingChannel = () => {
         channel.send(JSON.stringify(message));
     }
 
-    return null;
+    return (
+        <SignalingChannelUI />
+    );
 };
 
 export default SignalingChannel;
