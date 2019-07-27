@@ -1,4 +1,4 @@
-import config from 'app-config';
+import config from 'src/app-config';
 
 const captureMedia = async (mediaOptions) => {
     return navigator.mediaDevices.getUserMedia(mediaOptions);

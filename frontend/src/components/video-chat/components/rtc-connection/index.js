@@ -5,7 +5,7 @@ import useBus, { dispatch as emit } from 'use-bus';
 
 import Video from '../video';
 
-import config from 'app-config';
+import config from 'src/app-config';
 
 
 export default ({

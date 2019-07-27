@@ -1,4 +1,4 @@
-import isReactNative from 'utils/platform';
+import isReactNative from 'src/utils/platform';
 
 import copy from 'copy-text-to-clipboard';
 

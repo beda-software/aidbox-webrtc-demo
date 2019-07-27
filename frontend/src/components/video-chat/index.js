@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
-import { getLocalMedia } from 'utils/media';
+import { getLocalMedia } from 'src/utils/media';
 
 import VideoChatUI from './video-chat-ui';
 
