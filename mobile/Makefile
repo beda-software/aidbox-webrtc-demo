@@ -1,2 +1,0 @@
-update:
-	./scripts/update.sh
