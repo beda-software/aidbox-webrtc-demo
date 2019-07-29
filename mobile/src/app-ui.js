@@ -9,7 +9,7 @@ import {
     Input
 } from 'native-base';
 
-import SignalingChannel from 'src/components/signaling';
+import SignalingChannel from './components/signaling';
 import VideoChat from './components/video-chat';
 import Controls from './components/controls';
 
