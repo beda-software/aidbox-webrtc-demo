@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
 import { createRoom, createLogin } from './utils/room';
@@ -9,16 +9,24 @@ import AppUI from './app-ui';
 
 
 const App = () => {
+    const [isMediaCaptured,    setIsMediaCaptured]    = useState(false);
+    const [isSignalingReady,   setIsSignalingReady]   = useState(false);
+
     const [room,               setRoom]               = useState(createRoom());
     const [localParticipant,   setLocalParticipant]   = useState(createLogin());
     const [remoteParticipants, setRemoteParticipants] = useState([]);
 
-    // Enter room when local media is ready
+    // Enter room when local media and signaling channel is ready
 
-    useBus("media-captured", () => {
-        emit({ type: "login", login: localParticipant });
-        emit({ type: "join-room", login: localParticipant, room });
-    });
+    useBus("media-captured", () => { setIsMediaCaptured(true) });
+    useBus("channel-opened", () => { setIsSignalingReady(true) });
+
+    useEffect(() => {
+        if (isMediaCaptured && isSignalingReady) {
+            emit({ type: "login", login: localParticipant });
+            emit({ type: "join-room", login: localParticipant, room });
+        };
+    }, [isMediaCaptured, isSignalingReady])
 
     // Listen signaling channel
 

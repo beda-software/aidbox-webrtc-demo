@@ -7,14 +7,12 @@ import SignalingChannelUI from './signaling-ui';
 
 
 // TODO: replace hardcoded address with environment variable
-const socket = new WebSocket(
-    isReactNative() ? "wss://webrtc.beda.software/ws/" :
-    process.env.REACT_APP_BACKEND_BASE_URL ||
-    "ws://localhost:3001/ws/"
-);
+const addr = isReactNative()
+    ? "wss://webrtc.beda.software/ws/"
+    : process.env.REACT_APP_BACKEND_BASE_URL || "ws://localhost:3001/ws/";
 
 const SignalingChannel = () => {
-    const [channel,    setChannel]    = useState(socket);
+    const [channel,    setChannel]    = useState(new WebSocket(addr));
 
     const [login,      setLogin]      = useState(null);
     const [joinRoom,   setJoinRoom]   = useState(null);
@@ -33,6 +31,22 @@ const SignalingChannel = () => {
     useBus("offer",      send);
     useBus("answer",     send);
     useBus("candidate",  send);
+
+    // Websocket events
+
+    useEffect(() => {
+        if (channel && channel.readyState === 1) {
+            emit("channel-opened");
+        };
+    }, [channel.readyState]);
+
+    useEffect(() => {
+        if (channel) {
+            channel.addEventListener("message", transferMessage);
+        }
+    }, [channel]);
+
+    // Signaling events
 
     useEffect(() => {
         if (login) {
@@ -96,10 +110,6 @@ const SignalingChannel = () => {
             });
         }
     }, [candidate]);
-
-    useEffect(() => {
-        channel.addEventListener("message", transferMessage);
-    }, [channel]);
 
     function transferMessage({ data }) {
         const message = parseMessage(data);
