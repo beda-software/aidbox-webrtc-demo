@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
-import Video from '../video';
+import RTCConnectionUI from './rtc-connection-ui';
 
 import config from 'src/app-config';
 
@@ -153,8 +153,8 @@ export default ({
         })
     };
 
-    return stream && (
-        <Video
+    return (
+        <RTCConnectionUI
             stream={stream}
             key={key}
             width="95%"
