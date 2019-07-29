@@ -1,3 +1,6 @@
+import isReactNative from 'src/utils/platform';
+import requestPermissions from 'src/mobile/permissions';
+
 import config from 'src/app-config';
 
 const captureMedia = async (mediaOptions) => {
@@ -5,5 +8,9 @@ const captureMedia = async (mediaOptions) => {
 };
 
 export async function getLocalMedia() {
+    if (isReactNative()) {
+        return requestPermissions();
+    };
+
     return await captureMedia(config.localMedia);
 }
