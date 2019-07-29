@@ -1,7 +1,7 @@
 import React from 'react';
 
-const ComponentUI = () => {
+const SignalingUI = () => {
     return null;
 };
 
-export default ComponentUI;
+export default SignalingUI;

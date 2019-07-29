@@ -10,7 +10,7 @@ const VideoUI = ({ stream, key, width, height }) => {
             key={key}
             style={{
                 width: "100%",
-                height: "100%",
+                height: 350,
             }}
         />
     );

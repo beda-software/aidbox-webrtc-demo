@@ -1,7 +1,7 @@
 import React from 'react';
 
-const ComponentUI = () => {
+const RTCConnectionUI = () => {
     return null;
 };
 
-export default ComponentUI;
+export default RTCConnectionUI;

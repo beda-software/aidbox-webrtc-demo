@@ -1,7 +1,8 @@
 import React from 'react';
 
-const ComponentUI = () => {
+
+const ControlsUI = () => {
     return null;
 };
 
-export default ComponentUI;
+export default ControlsUI;
