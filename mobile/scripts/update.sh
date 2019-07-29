@@ -19,6 +19,7 @@ replace_path()
 }
 
 cp $origin/App.js $target/App.js
+cp $origin/app-config.js $target/app-config.js
 if [ ! -f "$target/app-ui.js" ]
 then
     touch $target/app-ui.js
