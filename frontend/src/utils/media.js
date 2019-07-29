@@ -5,11 +5,9 @@ import getUserMedia from 'src/mobile/media';
 import config from 'src/app-config';
 
 const captureMedia = async (mediaOptions) => {
-    const mediaHandler = isReactNative()
-        ? getUserMedia
-        : navigator.mediaDevices.getUserMedia;
-
-    return mediaHandler(mediaOptions);
+    return isReactNative()
+        ? getUserMedia(mediaOptions)
+        : navigator.mediaDevices.getUserMedia(mediaOptions);
 };
 
 export async function getLocalMedia() {
