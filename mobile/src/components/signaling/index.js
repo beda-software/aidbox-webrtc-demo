@@ -1,10 +1,14 @@
+import isReactNative from 'src/utils/platform';
+
 import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
-import SignalingChannelUI from './signaling-channel-ui';
+import SignalingChannelUI from './signaling-ui';
 
 
+// TODO: replace hardcoded address with environment variable
 const socket = new WebSocket(
+    isReactNative() ? "wss://webrtc.beda.software/ws/" :
     process.env.REACT_APP_BACKEND_BASE_URL ||
     "ws://localhost:3001/ws/"
 );
