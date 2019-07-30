@@ -14,7 +14,6 @@ export default ({
     localParticipant,
     localStream,
     remoteParticipant,
-    key
 }) => {
     const [connection,  setConnection]  = useState(null);
     const [stream,      setStream]      = useState(null);
@@ -158,7 +157,6 @@ export default ({
     return (
         <RTCConnectionUI
             stream={stream}
-            key={key}
             width="95%"
             height="100%"
         />

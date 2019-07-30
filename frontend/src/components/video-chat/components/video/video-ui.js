@@ -5,7 +5,7 @@ import  { Container, Loader } from 'semantic-ui-react';
 import './video.css';
 
 
-const VideoUI = ({ stream, key, width, height }) => {
+const VideoUI = ({ stream, width, height }) => {
     const [isReady, setIsReady] = useState(false);
 
     const onReadyStateChange = (e) => {
@@ -21,7 +21,6 @@ const VideoUI = ({ stream, key, width, height }) => {
             <Container className="video-container">
                 <video
                     onLoadedData={onReadyStateChange}
-                    key={key}
                     ref={(video) => {
                         if (video) {
                             video.srcObject = stream;
