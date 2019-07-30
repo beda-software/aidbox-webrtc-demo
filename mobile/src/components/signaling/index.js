@@ -11,8 +11,12 @@ const addr = isReactNative()
     ? "wss://webrtc.beda.software/ws/"
     : process.env.REACT_APP_BACKEND_BASE_URL || "ws://localhost:3001/ws/";
 
+const socket = window.socket || new WebSocket(addr);
+window.socket = socket;
+
+
 const SignalingChannel = () => {
-    const [channel,        setChannel]        = useState(new WebSocket(addr));
+    const [channel,        setChannel]        = useState(socket);
     const [isReadyChannel, setIsReadyChannel] = useState(false);
 
     const [login,          setLogin]          = useState(null);
@@ -41,7 +45,9 @@ const SignalingChannel = () => {
         }
 
         if (channel) {
-            channel.addEventListener("open", () => { setIsReadyChannel(true) });
+            channel.addEventListener("open", () => {
+                setIsReadyChannel(true);
+            });
             channel.addEventListener("message", transferMessage);
         }
     }, [channel]);

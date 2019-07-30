@@ -14,8 +14,7 @@ function getRoomID() {
             .value()
     }
 
-    // return uuidv4();
-    return 'room';
+    return uuidv4();
 }
 
 export function createLogin() {
