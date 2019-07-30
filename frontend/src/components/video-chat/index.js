@@ -12,16 +12,16 @@ const VideoChat = ({ localParticipant, remoteParticipants }) => {
     const [localStream, setLocalStream] = useState(null);
 
     useBus("mute-micro", ({ participant }) => {
-        if (participant === localParticipant) {
+        if (localStream && participant === localParticipant) {
             muteMicro(localStream);
             emit("response-mute-micro");
         }
     }, [localStream, localParticipant]);
 
     useBus("unmute-micro", ({ participant }) => {
-        if (participant === localParticipant) {
+        if (localStream && participant === localParticipant) {
             unmuteMicro(localStream);
-            emit("response-unmute-micro")
+            emit("response-unmute-micro");
         }
     }, [localStream, localParticipant]);
 

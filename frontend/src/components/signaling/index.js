@@ -12,16 +12,17 @@ const addr = isReactNative()
     : process.env.REACT_APP_BACKEND_BASE_URL || "ws://localhost:3001/ws/";
 
 const SignalingChannel = () => {
-    const [channel,    setChannel]    = useState(new WebSocket(addr));
+    const [channel,        setChannel]        = useState(new WebSocket(addr));
+    const [isReadyChannel, setIsReadyChannel] = useState(false);
 
-    const [login,      setLogin]      = useState(null);
-    const [joinRoom,   setJoinRoom]   = useState(null);
-    const [logout,     setLogout]     = useState(null);
+    const [login,          setLogin]          = useState(null);
+    const [joinRoom,       setJoinRoom]       = useState(null);
+    const [logout,         setLogout]         = useState(null);
 
-    const [waitOffer,  setWaitOffer]  = useState(null);
-    const [offer,      setOffer]      = useState(null);
-    const [answer,     setAnswer]     = useState(null);
-    const [candidate,  setCandidate]  = useState(null);
+    const [waitOffer,      setWaitOffer]      = useState(null);
+    const [offer,          setOffer]          = useState(null);
+    const [answer,         setAnswer]         = useState(null);
+    const [candidate,      setCandidate]      = useState(null);
 
     useBus("login",      send);
     useBus("join-room",  send);
@@ -36,15 +37,20 @@ const SignalingChannel = () => {
 
     useEffect(() => {
         if (channel && channel.readyState === 1) {
-            emit("channel-opened");
-        };
-    }, [channel.readyState]);
+            setIsReadyChannel(true);
+        }
 
-    useEffect(() => {
         if (channel) {
+            channel.addEventListener("open", () => { setIsReadyChannel(true) });
             channel.addEventListener("message", transferMessage);
         }
     }, [channel]);
+
+    useEffect(() => {
+        if (isReadyChannel) {
+            emit("channel-opened");
+        }
+    }, [isReadyChannel]);
 
     // Signaling events
 
