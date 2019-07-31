@@ -10,7 +10,7 @@ import RTCConnectionUI from './rtc-connection-ui';
 import config from 'src/app-config';
 
 
-export default ({
+const RTCConnection = ({
     localParticipant,
     localStream,
     remoteParticipant,
@@ -59,11 +59,12 @@ export default ({
     const createConnection = () => {
         const conn = new RTCPeerConnection(config.connection);
 
-        conn.addEventListener('icecandidate', onIceCandidate);
-        conn.addEventListener('addstream',    onAddStream);
+        conn.addEventListener("icecandidate", onIceCandidate);
+        conn.addEventListener("addstream",    onAddStream);
 
-        // TODO: replace code below with addTrack method
-        conn.addStream(localStream);
+        _.forEach(localStream.getTracks(), (track) => {
+            conn.addTrack(track, localStream);
+        });
 
         return conn;
     };
@@ -162,3 +163,5 @@ export default ({
         />
     )
 };
+
+export default RTCConnection;
