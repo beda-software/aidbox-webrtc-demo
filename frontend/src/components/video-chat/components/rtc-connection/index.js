@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+import isReactNative from 'src/utils/platform';
+
 import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
@@ -62,9 +64,13 @@ const RTCConnection = ({
         conn.addEventListener("icecandidate", onIceCandidate);
         conn.addEventListener("addstream",    onAddStream);
 
-        _.forEach(localStream.getTracks(), (track) => {
-            conn.addTrack(track, localStream);
-        });
+        if (isReactNative()) {
+            conn.addStream(localStream);
+        } else {
+            _.forEach(localStream.getTracks(), (track) => {
+                conn.addTrack(track, localStream);
+            });
+        }
 
         return conn;
     };

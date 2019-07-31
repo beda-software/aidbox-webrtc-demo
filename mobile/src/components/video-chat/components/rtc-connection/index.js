@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+import isReactNative from 'src/utils/platform';
+
 import React, { useState, useEffect } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
@@ -10,11 +12,10 @@ import RTCConnectionUI from './rtc-connection-ui';
 import config from 'src/app-config';
 
 
-export default ({
+const RTCConnection = ({
     localParticipant,
     localStream,
     remoteParticipant,
-    key
 }) => {
     const [connection,  setConnection]  = useState(null);
     const [stream,      setStream]      = useState(null);
@@ -60,11 +61,16 @@ export default ({
     const createConnection = () => {
         const conn = new RTCPeerConnection(config.connection);
 
-        conn.addEventListener('icecandidate', onIceCandidate);
-        conn.addEventListener('addstream',    onAddStream);
+        conn.addEventListener("icecandidate", onIceCandidate);
+        conn.addEventListener("addstream",    onAddStream);
 
-        // TODO: replace code below with addTrack method
-        conn.addStream(localStream);
+        if (isReactNative()) {
+            conn.addStream(localStream);
+        } else {
+            _.forEach(localStream.getTracks(), (track) => {
+                conn.addTrack(track, localStream);
+            });
+        }
 
         return conn;
     };
@@ -158,9 +164,10 @@ export default ({
     return (
         <RTCConnectionUI
             stream={stream}
-            key={key}
             width="95%"
             height="100%"
         />
     )
 };
+
+export default RTCConnection;
