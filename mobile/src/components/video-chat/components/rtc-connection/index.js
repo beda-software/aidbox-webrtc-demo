@@ -122,12 +122,6 @@ const RTCConnection = ({
     function onCandidate({ candidate }) {
         if (connection) {
             connection.addIceCandidate(candidate);
-        } else {
-            // TODO: fix this case
-            console.error(
-                "Connection doesn't exist, but got candidate",
-                candidate,
-            );
         }
     };
 

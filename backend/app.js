@@ -184,9 +184,6 @@ function sendTo(connection, message) {
    try {
       connection.send(JSON.stringify(message));
    } catch(err) {
-      console.log(
-         `Cannot send message because connection is absent. See output below:`,
-         err
-      );
+      console.error("Cannot send message because connection is absent.");
    }
 };
