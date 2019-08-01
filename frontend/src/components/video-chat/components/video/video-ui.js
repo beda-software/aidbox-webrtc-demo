@@ -5,7 +5,7 @@ import  { Container, Loader } from 'semantic-ui-react';
 import './video.css';
 
 
-const VideoUI = ({ stream, width, height }) => {
+const VideoUI = ({ stream, className, width, height }) => {
     const [isReady, setIsReady] = useState(false);
 
     const onReadyStateChange = (e) => {
@@ -15,11 +15,11 @@ const VideoUI = ({ stream, width, height }) => {
         }
     };
 
-    // TODO: why I should use ref? Try avoid that
     return (
         stream && (
             <Container className="video-container">
                 <video
+                    className={className}
                     onLoadedData={onReadyStateChange}
                     ref={(video) => {
                         if (video) {

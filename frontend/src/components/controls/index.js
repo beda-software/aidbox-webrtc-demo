@@ -9,10 +9,14 @@ import ControlsUI from './controls-ui';
 
 
 const Controls = ({ room, localParticipant }) => {
-    const [isMute, setIsMute] = useState(false);
+    const [isMutedAudio, setIsMutedAudio] = useState(true);
+    const [isMutedVideo, setIsMutedVideo] = useState(false);
 
-    useBus("response-mute-micro",   () => setIsMute(true));
-    useBus("response-unmute-micro", () => setIsMute(false));
+    useBus("response-mute-micro",   () => setIsMutedAudio(true));
+    useBus("response-unmute-micro", () => setIsMutedAudio(false));
+
+    useBus("response-mute-video",   () => setIsMutedVideo(true));
+    useBus("response-unmute-video", () => setIsMutedVideo(false));
 
     const shareLink = () => {
         copy(isReactNative ? window.location.href : room);
@@ -20,7 +24,14 @@ const Controls = ({ room, localParticipant }) => {
 
     const toggleMicro = () => {
         emit({
-            type: `${isMute ? "unmute" : "mute"}-micro`,
+            type: `${isMutedAudio ? "unmute" : "mute"}-micro`,
+            participant: localParticipant,
+        });
+    };
+
+    const toggleVideo = () => {
+        emit({
+            type: `${isMutedVideo ? "unmute" : "mute"}-video`,
             participant: localParticipant,
         });
     };
@@ -29,7 +40,9 @@ const Controls = ({ room, localParticipant }) => {
         <ControlsUI
             copyHandler={shareLink}
             microHandler={toggleMicro}
-            isMute={isMute}
+            videoHandler={toggleVideo}
+            isMutedAudio={isMutedAudio}
+            isMutedVideo={isMutedVideo}
         />
     )
 }

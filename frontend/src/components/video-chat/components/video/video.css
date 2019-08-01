@@ -7,11 +7,7 @@
 }
 
 @media screen and (max-width: 768px) {
-    .video-container {
+    .app-chat .video-container {
         max-width: none;
     }
-}
-
-video {
-    max-height: 46vh;
 }

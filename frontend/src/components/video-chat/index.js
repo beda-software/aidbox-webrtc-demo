@@ -25,6 +25,20 @@ const VideoChat = ({ localParticipant, remoteParticipants }) => {
         }
     }, [localStream, localParticipant]);
 
+    useBus("mute-video", ({ participant }) => {
+        if (localStream && participant === localParticipant) {
+            muteVideo(localStream);
+            emit("response-mute-video");
+        }
+    }, [localStream, localParticipant]);
+
+    useBus("unmute-video", ({ participant }) => {
+        if (localStream && participant === localParticipant) {
+            unmuteVideo(localStream);
+            emit("response-unmute-video");
+        }
+    }, [localStream, localParticipant]);
+
     useEffect(() => {
         initLocalStream();
     }, []);
@@ -42,6 +56,14 @@ const VideoChat = ({ localParticipant, remoteParticipants }) => {
 
     const unmuteMicro = (stream) => {
         _.first(stream.getAudioTracks()).enabled = true;
+    };
+
+    const muteVideo = (stream) => {
+        _.first(stream.getVideoTracks()).enabled = false;
+    };
+
+    const unmuteVideo = (stream) => {
+        _.first(stream.getVideoTracks()).enabled = true;
     };
 
     return (

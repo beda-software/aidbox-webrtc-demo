@@ -109,7 +109,6 @@ wsServer.on('connection', function(connection) {
       const { login, room } = connection;
 
       leaveRoom(room, login);
-      console.log(`Disconnecting from ${login}.`);
    });
 });
 
@@ -142,6 +141,7 @@ function leaveRoom(room, login) {
       login,
    });
    delete users[login];
+   console.log(`Disconnecting from ${login}.`);
 };
 
 // Room: low-level methods

@@ -47,3 +47,24 @@
 #root .app .app-controls button {
   margin: 0 6px;
 }
+
+.settings-button {
+  background-color: transparent !important;
+  padding-left: 0 !important;
+}
+
+.settings-button label {
+  color: white !important;
+}
+
+.local-stream, .remote-stream {
+  outline: 3px dotted;
+}
+
+.local-stream {
+  outline-color: green;
+}
+
+.remote-stream {
+  outline-color: grey;
+}

@@ -13,6 +13,7 @@ const VideoChatUI = ({ localStream, localParticipant, remoteParticipants }) => {
         <Grid.Row className="app-chat-row app-chat-main">
             {localStream && (
                 <Video
+                    className="local-stream"
                     stream={localStream}
                     key={localParticipant}
                     width="95%"

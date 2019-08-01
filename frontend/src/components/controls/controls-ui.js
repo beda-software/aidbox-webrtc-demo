@@ -3,7 +3,13 @@ import React from 'react';
 import  { Grid, Button } from 'semantic-ui-react';
 
 
-const ControlsUI = ({ copyHandler, microHandler, isMute }) => {
+const ControlsUI = ({
+    copyHandler,
+    microHandler,
+    videoHandler,
+    isMutedAudio,
+    isMutedVideo
+}) => {
     return (
         <Grid.Row className="app-chat-row app-controls">
             <Button
@@ -15,8 +21,8 @@ const ControlsUI = ({ copyHandler, microHandler, isMute }) => {
             />
             <Button
                 onClick={microHandler}
-                color={isMute ? "green" : "red"}
-                icon={isMute ? "microphone" : "microphone slash"}
+                color={isMutedAudio ? "green" : "red"}
+                icon="microphone"
                 size="big"
                 circular
             />
@@ -28,10 +34,11 @@ const ControlsUI = ({ copyHandler, microHandler, isMute }) => {
                 disabled
             />
             <Button
+                onClick={videoHandler}
+                color={isMutedVideo ? "green" : "red"}
                 icon="video"
                 size="big"
                 circular
-                disabled
             />
             <Button
                 size="big"

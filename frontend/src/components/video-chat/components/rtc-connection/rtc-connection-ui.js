@@ -10,6 +10,7 @@ const RTCConnectionUI = ({
 }) => {
     return stream && (
         <Video
+            className="remote-stream"
             stream={stream}
             width={width}
             height={height}
