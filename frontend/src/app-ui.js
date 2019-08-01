@@ -59,98 +59,99 @@ const AppUI = ({
         setIsDisabledVideo(enabled);
     };
 
-    return !isEntered ? (
-        <Modal
-            size="small"
-            open={!isEntered}
-            basic
-        >
-            <Header
-                icon="wechat"
-                content="Create new conference or join to exist room"
-            />
-            <Modal.Content>
-                <Input
-                    action={{
-                        onClick: shareLink,
-                        labelPosition: "left",
-                        icon: "copy",
-                        content: isLinkCopied ? "Copied" : "Copy",
-                        color: isLinkCopied ? "green" : null,
-                    }}
-                    actionPosition="left"
-                    onChange={changeRoom}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            enterRoom();
-                        }
-                    }}
-                    value={room}
-                    focus
-                    fluid
-                />
-            </Modal.Content>
-            <Modal.Actions>
-                <Button
-                    className="settings-button"
-                    floated="left"
-                >
-                    <Form.Field
-                        onChange={setAudio}
-                        control={Checkbox}
-                        label="Mute my micro"
-                        checked={isDisabledAudio}
-                    />
-                </Button>
-                <Button
-                    className="settings-button"
-                    floated="left"
-                >
-                    <Form.Field
-                        onChange={setVideo}
-                        control={Checkbox}
-                        label="Disable my video"
-                        checked={isDisabledVideo}
-                    />
-                </Button>
-                <Button
-                    color="green"
-                    onClick={enterRoom}
-                    labelPosition="right"
-                    icon
-                >
-                    Enter
-                    <Icon name="right arrow" />
-                </Button>
-            </Modal.Actions>
-        </Modal>
-    ) : (
+    return (
         <Container
             className="app"
             fluid
         >
-            <Grid className="app-chat">
-                <SignalingChannel />
+            {!isEntered ? (
+                <Modal
+                    size="small"
+                    open
+                    basic
+                >
+                    <Header
+                        icon="wechat"
+                        content="Create new chat or join to exist room."
+                    />
+                    <Modal.Content>
+                        <Input
+                            action={{
+                                onClick: shareLink,
+                                labelPosition: "left",
+                                icon: "copy",
+                                content: isLinkCopied ? "Copied" : "Copy",
+                                color: isLinkCopied ? "green" : "grey",
+                            }}
+                            actionPosition="left"
+                            onChange={changeRoom}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    enterRoom();
+                                }
+                            }}
+                            value={room}
+                            focus
+                            fluid
+                        />
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button
+                            className="settings-button"
+                            floated="left"
+                        >
+                            <Form.Field
+                                onChange={setAudio}
+                                control={Checkbox}
+                                label="Mute my micro"
+                                checked={isDisabledAudio}
+                            />
+                        </Button>
+                        <Button
+                            className="settings-button"
+                            floated="left"
+                        >
+                            <Form.Field
+                                onChange={setVideo}
+                                control={Checkbox}
+                                label="Disable my video"
+                                checked={isDisabledVideo}
+                            />
+                        </Button>
+                        <Button
+                            color="green"
+                            onClick={enterRoom}
+                            labelPosition="right"
+                            icon
+                        >
+                            Enter
+                            <Icon name="right arrow" />
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+            ) : (
+                <Grid className="app-chat">
+                    <SignalingChannel />
 
-                <Grid.Row className="app-chat-debug">
-                    <p>Participants: {
-                        _.map(
-                            [localParticipant, ...remoteParticipants],
-                            (p) => `${p.login || p} `)
-                        }
-                    </p>
-                </Grid.Row>
+                    <Grid.Row className="app-chat-debug">
+                        <p>Participants: {
+                            _.map(
+                                [localParticipant, ...remoteParticipants],
+                                (p) => `${p.login || p} `)
+                            }
+                        </p>
+                    </Grid.Row>
 
-                <VideoChat
-                    localParticipant={localParticipant}
-                    remoteParticipants={remoteParticipants}
-                />
+                    <VideoChat
+                        localParticipant={localParticipant}
+                        remoteParticipants={remoteParticipants}
+                    />
 
-                <Controls
-                    localParticipant={localParticipant}
-                />
-
-            </Grid>
+                    <Controls
+                        localParticipant={localParticipant}
+                    />
+                </Grid>
+            )}
         </Container>
     )
 };
