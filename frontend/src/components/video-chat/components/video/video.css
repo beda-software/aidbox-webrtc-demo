@@ -13,5 +13,6 @@
 }
 
 .app-chat .video-container video {
+    max-height: 46vh;
     padding: 8px;
 }

@@ -63,12 +63,12 @@ const App = () => {
     // Media
 
     useBus("set-audio", ({ enabled }) => {
-    console.log("TCL: enabled", enabled)
+        console.log("Audio enabled on start", enabled);
         setIsEnabledAudio(enabled);
     });
 
     useBus("set-video", ({ enabled }) => {
-    console.log("TCL: enabled", enabled)
+        console.log("Video enabled on start", enabled);
         setIsEnabledVideo(enabled);
     });
 

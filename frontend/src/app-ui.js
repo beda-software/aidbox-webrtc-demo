@@ -72,7 +72,7 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
                         labelPosition: "left",
                         icon: "copy",
                         content: isCopiedLink ? "Copied" : "Copy",
-                        color: isCopiedLink ? "green" : "",
+                        color: isCopiedLink ? "green" : null,
                     }}
                     actionPosition="left"
                     onChange={changeRoom}
