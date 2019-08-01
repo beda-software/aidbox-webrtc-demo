@@ -11,3 +11,7 @@
         max-width: none;
     }
 }
+
+.app-chat .video-container video {
+    padding: 8px;
+}

@@ -9,8 +9,12 @@ import ControlsUI from './controls-ui';
 
 
 const Controls = ({ room, localParticipant }) => {
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
+
     const [isMutedAudio, setIsMutedAudio] = useState(true);
     const [isMutedVideo, setIsMutedVideo] = useState(false);
+
+    useBus("unset-copied", () => setIsLinkCopied(false));
 
     useBus("response-mute-micro",   () => setIsMutedAudio(true));
     useBus("response-unmute-micro", () => setIsMutedAudio(false));
@@ -20,6 +24,7 @@ const Controls = ({ room, localParticipant }) => {
 
     const shareLink = () => {
         copy(isReactNative ? window.location.href : room);
+        setIsLinkCopied(true);
     };
 
     const toggleMicro = () => {
@@ -41,6 +46,7 @@ const Controls = ({ room, localParticipant }) => {
             copyHandler={shareLink}
             microHandler={toggleMicro}
             videoHandler={toggleVideo}
+            isLinkCopied={isLinkCopied}
             isMutedAudio={isMutedAudio}
             isMutedVideo={isMutedVideo}
         />

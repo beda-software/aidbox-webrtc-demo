@@ -1,30 +1,51 @@
 import React from 'react';
+import { dispatch as emit } from 'use-bus';
 
-import  { Grid, Button } from 'semantic-ui-react';
+import  { Grid, Button, Popup } from 'semantic-ui-react';
 
 
 const ControlsUI = ({
     copyHandler,
     microHandler,
     videoHandler,
+    isLinkCopied,
     isMutedAudio,
-    isMutedVideo
+    isMutedVideo,
 }) => {
     return (
         <Grid.Row className="app-chat-row app-controls">
-            <Button
-                onClick={copyHandler}
-                size="big"
-                color="green"
-                icon="share alternate"
-                circular
-            />
-            <Button
-                onClick={microHandler}
-                color={isMutedAudio ? "green" : "red"}
-                icon="microphone"
-                size="big"
-                circular
+            <Popup
+                onClose={() => { emit("unset-copied") }}
+                content={
+                    isLinkCopied
+                        ? "Link has been copied"
+                        : "Copy link to clipboard"
+                }
+                trigger={
+                    <Button
+                        onClick={copyHandler}
+                        size="big"
+                        color="green"
+                        icon="share alternate"
+                        circular
+                    />
+                }
+                position="top center"
+                inverted
+                />
+            <Popup
+                content={`${isMutedAudio ? "Unmute" : "Mute"} microphone`}
+                trigger={
+                    <Button
+                        onClick={microHandler}
+                        color={isMutedAudio ? "green" : "red"}
+                        icon="microphone"
+                        size="big"
+                        circular
+                    />
+                }
+                position="top center"
+                inverted
             />
             <Button
                 color="red"
@@ -33,12 +54,19 @@ const ControlsUI = ({
                 circular
                 disabled
             />
-            <Button
-                onClick={videoHandler}
-                color={isMutedVideo ? "green" : "red"}
-                icon="video"
-                size="big"
-                circular
+            <Popup
+                content={`${isMutedVideo ? "Enable" : "Disable"} camera`}
+                trigger={
+                    <Button
+                        onClick={videoHandler}
+                        color={isMutedVideo ? "green" : "red"}
+                        icon="video"
+                        size="big"
+                        circular
+                    />
+                }
+                position="top center"
+                inverted
             />
             <Button
                 size="big"
