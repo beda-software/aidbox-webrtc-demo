@@ -27,14 +27,6 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
     const [isDisabledAudio, setIsDisabledAudio] = useState(true);
     const [isDisabledVideo, setIsDisabledVideo] = useState(false);
 
-    useEffect(() => {
-        emit({ type: "set-audio", enabled: !isDisabledAudio });
-    }, [isDisabledAudio]);
-
-    useEffect(() => {
-        emit({ type: "set-video", enabled: !isDisabledVideo });
-    }, [isDisabledVideo]);
-
     const changeRoom = (e, { value: room }) => {
         emit({
             type: "change-room",
@@ -43,6 +35,8 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
     };
 
     const enterRoom = () => {
+        emit({ type: "set-audio", enabled: !isDisabledAudio });
+        emit({ type: "set-video", enabled: !isDisabledVideo });
         emit({ type: "enter-room" });
     };
 

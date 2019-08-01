@@ -15,8 +15,8 @@ const App = () => {
     const [isSignalingReady,   setIsSignalingReady]   = useState(false);
 
     const [isEntered,          setIsEntered]          = useState(false);
-    const [isEnabledAudio,     setIsEnabledAudio]     = useState(false);
-    const [isEnabledVideo,     setIsEnabledVideo]     = useState(true);
+    const [isEnabledAudio,     setIsEnabledAudio]     = useState(null);
+    const [isEnabledVideo,     setIsEnabledVideo]     = useState(null);
 
     const [room,               setRoom]               = useState(createRoom());
     const [localParticipant,   setLocalParticipant]   = useState(createLogin());
@@ -63,10 +63,12 @@ const App = () => {
     // Media
 
     useBus("set-audio", ({ enabled }) => {
+    console.log("TCL: enabled", enabled)
         setIsEnabledAudio(enabled);
     });
 
     useBus("set-video", ({ enabled }) => {
+    console.log("TCL: enabled", enabled)
         setIsEnabledVideo(enabled);
     });
 
