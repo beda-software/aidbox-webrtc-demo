@@ -24,6 +24,8 @@ import './App.css';
 
 
 const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
+    const [isCopiedLink,    setIsCopiedLink]    = useState(false);
+
     const [isDisabledAudio, setIsDisabledAudio] = useState(true);
     const [isDisabledVideo, setIsDisabledVideo] = useState(false);
 
@@ -38,6 +40,11 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
         emit({ type: "set-audio", enabled: !isDisabledAudio });
         emit({ type: "set-video", enabled: !isDisabledVideo });
         emit({ type: "enter-room" });
+    };
+
+    const shareLink = () => {
+        copy(window.location.href);
+        setIsCopiedLink(true);
     };
 
     const setAudio = (e, { checked: enabled }) => {
@@ -61,10 +68,11 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
             <Modal.Content>
                 <Input
                     action={{
-                        onClick: () => { copy(window.location.href) },
+                        onClick: shareLink,
                         labelPosition: "left",
                         icon: "copy",
-                        content: "Copy",
+                        content: isCopiedLink ? "Copied" : "Copy",
+                        color: isCopiedLink ? "green" : "",
                     }}
                     actionPosition="left"
                     onChange={changeRoom}
