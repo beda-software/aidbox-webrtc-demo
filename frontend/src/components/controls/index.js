@@ -1,20 +1,16 @@
-import isReactNative from 'src/utils/platform';
-
-import copy from 'copy-text-to-clipboard';
-
 import React, { useState } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
 import ControlsUI from './controls-ui';
 
 
-const Controls = ({ room, localParticipant }) => {
+const Controls = ({ localParticipant }) => {
     const [isLinkCopied, setIsLinkCopied] = useState(false);
 
     const [isMutedAudio, setIsMutedAudio] = useState(true);
     const [isMutedVideo, setIsMutedVideo] = useState(false);
 
-    useBus("unset-copied", () => setIsLinkCopied(false));
+    useBus("unset-is-copied-room-link", () => setIsLinkCopied(false));
 
     useBus("response-mute-micro",   () => setIsMutedAudio(true));
     useBus("response-unmute-micro", () => setIsMutedAudio(false));
@@ -23,7 +19,7 @@ const Controls = ({ room, localParticipant }) => {
     useBus("response-unmute-video", () => setIsMutedVideo(false));
 
     const shareLink = () => {
-        copy(isReactNative ? window.location.href : room);
+        emit({ type: "copy-room-link" });
         setIsLinkCopied(true);
     };
 

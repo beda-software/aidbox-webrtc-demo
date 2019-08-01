@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import copy from 'copy-text-to-clipboard';
 
 import isReactNative from 'src/utils/platform';
 
@@ -60,21 +61,25 @@ const App = () => {
         removeRemoteParticipant(_.find(remoteParticipants, { login }));
     }, [remoteParticipants]);
 
-    // Media
+    // Media signals
 
-    useBus("set-audio", ({ enabled }) => {
+    useBus("preset-audio", ({ enabled }) => {
         console.log("Audio enabled on start", enabled);
         setIsEnabledAudio(enabled);
     });
 
-    useBus("set-video", ({ enabled }) => {
+    useBus("preset-video", ({ enabled }) => {
         console.log("Video enabled on start", enabled);
         setIsEnabledVideo(enabled);
     });
 
     // Room
 
-    useBus("change-room", ({ room }) => {
+    useBus("copy-room-link", () => {
+        copy(isReactNative ? window.location.href : room);
+    });
+
+    useBus("rename-room", ({ room }) => {
         setRoom(room);
     });
 

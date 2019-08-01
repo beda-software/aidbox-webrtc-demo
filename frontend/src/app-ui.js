@@ -1,8 +1,7 @@
 import _ from 'lodash';
-import copy from 'copy-text-to-clipboard';
 
-import React, { useState, useEffect } from 'react';
-import useBus, { dispatch as emit } from 'use-bus';
+import React, { useState } from 'react';
+import { dispatch as emit } from 'use-bus';
 
 import {
     Container,
@@ -23,27 +22,32 @@ import Controls from './components/controls';
 import './App.css';
 
 
-const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
-    const [isCopiedLink,    setIsCopiedLink]    = useState(false);
+const AppUI = ({
+    isEntered,
+    room,
+    localParticipant,
+    remoteParticipants,
+}) => {
+    const [isLinkCopied,    setIsCopiedLink]    = useState(false);
 
     const [isDisabledAudio, setIsDisabledAudio] = useState(true);
     const [isDisabledVideo, setIsDisabledVideo] = useState(false);
 
     const changeRoom = (e, { value: room }) => {
         emit({
-            type: "change-room",
+            type: "rename-room",
             room,
         })
     };
 
     const enterRoom = () => {
-        emit({ type: "set-audio", enabled: !isDisabledAudio });
-        emit({ type: "set-video", enabled: !isDisabledVideo });
+        emit({ type: "preset-audio", enabled: !isDisabledAudio });
+        emit({ type: "preset-video", enabled: !isDisabledVideo });
         emit({ type: "enter-room" });
     };
 
     const shareLink = () => {
-        copy(window.location.href);
+        emit({ type: "copy-room-link" });
         setIsCopiedLink(true);
     };
 
@@ -71,8 +75,8 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
                         onClick: shareLink,
                         labelPosition: "left",
                         icon: "copy",
-                        content: isCopiedLink ? "Copied" : "Copy",
-                        color: isCopiedLink ? "green" : null,
+                        content: isLinkCopied ? "Copied" : "Copy",
+                        color: isLinkCopied ? "green" : null,
                     }}
                     actionPosition="left"
                     onChange={changeRoom}
@@ -143,7 +147,6 @@ const AppUI = ({ isEntered, room, localParticipant, remoteParticipants }) => {
                 />
 
                 <Controls
-                    room={room}
                     localParticipant={localParticipant}
                 />
 

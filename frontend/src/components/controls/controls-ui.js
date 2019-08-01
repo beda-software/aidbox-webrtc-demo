@@ -15,7 +15,7 @@ const ControlsUI = ({
     return (
         <Grid.Row className="app-chat-row app-controls">
             <Popup
-                onClose={() => { emit("unset-copied") }}
+                onClose={() => { emit("unset-is-copied-room-link") }}
                 content={
                     isLinkCopied
                         ? "Link has been copied"
