@@ -136,10 +136,19 @@ function joinRoom(room, login) {
 };
 
 function leaveRoom(room, login) {
+   let conn = users[login];
+
    notifyRoom(room, {
       type: "logout",
       login,
    });
+   _.forEach(
+      getAllRemoteParticipants(room, login),
+      (participant) => sendTo(conn, {
+         type: "logout",
+         login: participant.login,
+      })
+   );
    delete users[login];
    console.log(`Disconnecting from ${login}.`);
 };
