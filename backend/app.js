@@ -136,20 +136,12 @@ function joinRoom(room, login) {
 };
 
 function leaveRoom(room, login) {
-   let conn = users[login];
+   delete users[login];
 
    notifyRoom(room, {
       type: "logout",
       login,
    });
-   _.forEach(
-      getAllRemoteParticipants(room, login),
-      (participant) => sendTo(conn, {
-         type: "logout",
-         login: participant.login,
-      })
-   );
-   delete users[login];
    console.log(`Disconnecting from ${login}.`);
 };
 
@@ -191,6 +183,7 @@ function parseMessage(message) {
 
 function sendTo(connection, message) {
    try {
+      console.log("TCL: sendTo -> message", message)
       connection.send(JSON.stringify(message));
    } catch(err) {
       console.error("Cannot send message because connection is absent.");
