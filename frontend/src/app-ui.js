@@ -33,7 +33,7 @@ const AppUI = ({
     const [isDisabledAudio, setIsDisabledAudio] = useState(true);
     const [isDisabledVideo, setIsDisabledVideo] = useState(false);
 
-    const changeRoom = (e, { value: room }) => {
+    const renameRoom = (e, { value: room }) => {
         emit({
             type: "rename-room",
             room,
@@ -71,7 +71,7 @@ const AppUI = ({
                     basic
                 >
                     <Header
-                        icon="wechat"
+                        icon="chat"
                         content="Create new chat or join to exist room."
                     />
                     <Modal.Content>
@@ -84,7 +84,7 @@ const AppUI = ({
                                 color: isLinkCopied ? "green" : "grey",
                             }}
                             actionPosition="left"
-                            onChange={changeRoom}
+                            onChange={renameRoom}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                     enterRoom();

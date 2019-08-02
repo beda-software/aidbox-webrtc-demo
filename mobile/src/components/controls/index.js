@@ -1,26 +1,38 @@
-import isReactNative from 'src/utils/platform';
-
-import copy from 'copy-text-to-clipboard';
-
 import React, { useState } from 'react';
 import useBus, { dispatch as emit } from 'use-bus';
 
 import ControlsUI from './controls-ui';
 
 
-const Controls = ({ room, localParticipant }) => {
-    const [isMute, setIsMute] = useState(false);
+const Controls = ({ localParticipant }) => {
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
 
-    useBus("response-mute-micro",   () => setIsMute(true));
-    useBus("response-unmute-micro", () => setIsMute(false));
+    const [isMutedAudio, setIsMutedAudio] = useState(true);
+    const [isMutedVideo, setIsMutedVideo] = useState(false);
+
+    useBus("unset-is-copied-room-link", () => setIsLinkCopied(false));
+
+    useBus("response-mute-micro",   () => setIsMutedAudio(true));
+    useBus("response-unmute-micro", () => setIsMutedAudio(false));
+
+    useBus("response-mute-video",   () => setIsMutedVideo(true));
+    useBus("response-unmute-video", () => setIsMutedVideo(false));
 
     const shareLink = () => {
-        copy(isReactNative ? window.location.href : room);
+        emit({ type: "copy-room-link" });
+        setIsLinkCopied(true);
     };
 
     const toggleMicro = () => {
         emit({
-            type: `${isMute ? "unmute" : "mute"}-micro`,
+            type: `${isMutedAudio ? "unmute" : "mute"}-micro`,
+            participant: localParticipant,
+        });
+    };
+
+    const toggleVideo = () => {
+        emit({
+            type: `${isMutedVideo ? "unmute" : "mute"}-video`,
             participant: localParticipant,
         });
     };
@@ -29,7 +41,10 @@ const Controls = ({ room, localParticipant }) => {
         <ControlsUI
             copyHandler={shareLink}
             microHandler={toggleMicro}
-            isMute={isMute}
+            videoHandler={toggleVideo}
+            isLinkCopied={isLinkCopied}
+            isMutedAudio={isMutedAudio}
+            isMutedVideo={isMutedVideo}
         />
     )
 }

@@ -9,7 +9,7 @@ const VideoUI = ({ stream, width, height }) => {
             streamURL={stream.toURL()}
             style={{
                 width: "100%",
-                height: 350,
+                height: 300,
             }}
         />
     );

@@ -26,12 +26,5 @@ export function createLogin() {
 
 export function createRoom() {
     const roomID = getRoomID();
-    if (!isReactNative()) {
-        window.history.pushState(
-            {},
-            `Room: ${roomID}`,
-            `/${roomID}`
-        );
-    }
     return roomID;
 }

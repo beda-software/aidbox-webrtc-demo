@@ -6,10 +6,12 @@ import { Container } from 'native-base';
 import Video from './components/video';
 import RTCConnection from './components/rtc-connection';
 
+import s from 'src/style';
+
 
 const VideoChatUI = ({ localStream, localParticipant, remoteParticipants }) => {
     return (
-        <Container>
+        <Container style={s.container}>
             {localStream && (
                 <Video
                     stream={localStream}
