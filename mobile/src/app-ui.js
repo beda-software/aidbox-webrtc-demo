@@ -15,6 +15,8 @@ import {
     Label,
     Input,
     Button,
+    CheckBox,
+    ListItem,
     StyleProvider,
 } from 'native-base';
 import getTheme from './native-base-theme/components';
@@ -56,12 +58,12 @@ const AppUI = ({
         setIsCopiedLink(true);
     };
 
-    const setAudio = (e, { checked: enabled }) => {
-        setIsDisabledAudio(enabled);
+    const setAudio = () => {
+        setIsDisabledAudio(!isDisabledAudio);
     };
 
-    const setVideo = (e, { checked: enabled }) => {
-        setIsDisabledVideo(enabled);
+    const setVideo = () => {
+        setIsDisabledVideo(!isDisabledVideo);
     };
 
     return (
@@ -92,6 +94,24 @@ const AppUI = ({
                                     autoFocus
                                 />
                             </Item>
+                            <ListItem style={{ marginLeft: 0 }}>
+                                <CheckBox
+                                    onPress={setAudio}
+                                    checked={isDisabledAudio}
+                                />
+                                <Body>
+                                    <Text style={{ color: "white" }}>Mute my micro</Text>
+                                </Body>
+                            </ListItem>
+                            <ListItem style={{ marginLeft: 0 }}>
+                                <CheckBox
+                                    onPress={setVideo}
+                                    checked={isDisabledVideo}
+                                />
+                                <Body>
+                                    <Text style={{ color: "white" }}>Disable my video</Text>
+                                </Body>
+                            </ListItem>
                             <Button style={s.button} onPress={enterRoom} full>
                                 <Text>Enter</Text>
                             </Button>

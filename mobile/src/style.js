@@ -32,6 +32,7 @@ const s = StyleSheet.create({
         color: "lightgrey",
     },
     button: {
+        marginTop: 20,
         backgroundColor: "green",
     },
     menu: {

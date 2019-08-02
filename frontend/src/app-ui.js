@@ -51,12 +51,12 @@ const AppUI = ({
         setIsCopiedLink(true);
     };
 
-    const setAudio = (e, { checked: enabled }) => {
-        setIsDisabledAudio(enabled);
+    const toggleAudio = () => {
+        setIsDisabledAudio(!isDisabledAudio);
     };
 
-    const setVideo = (e, { checked: enabled }) => {
-        setIsDisabledVideo(enabled);
+    const toggleVideo = () => {
+        setIsDisabledVideo(!isDisabledVideo);
     };
 
     return (
@@ -101,7 +101,7 @@ const AppUI = ({
                             floated="left"
                         >
                             <Form.Field
-                                onChange={setAudio}
+                                onChange={toggleAudio}
                                 control={Checkbox}
                                 label="Mute my micro"
                                 checked={isDisabledAudio}
@@ -112,7 +112,7 @@ const AppUI = ({
                             floated="left"
                         >
                             <Form.Field
-                                onChange={setVideo}
+                                onChange={toggleVideo}
                                 control={Checkbox}
                                 label="Disable my video"
                                 checked={isDisabledVideo}
